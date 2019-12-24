@@ -43,7 +43,7 @@ export default function NavBar() {
                                 textDecoration: "none"
                             }}
                         >
-                            Raycer
+                            DRaycer
                         </Link>
                     </Typography>
                     {firebase.auth().currentUser ? (
