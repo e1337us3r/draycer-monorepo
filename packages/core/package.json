@@ -1,0 +1,45 @@
+{
+  "name": "draycer",
+  "version": "0.0.1",
+  "description": "Distributed Raytracing Rendering library.",
+  "types": "dist/index.d.ts",
+  "main": "dist/index.js",
+  "module": "dist",
+  "repository": "https://gitlab.com/e1337us3r/draycer.git",
+  "author": "Sinan Sakaoglu <sinansakaoglu@outlook.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p .",
+    "lint-fix": "eslint --ext .ts --fix  'src/*'",
+    "release": "standard-version --no-verify"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^8.2.0",
+    "@commitlint/config-conventional": "^8.2.0",
+    "@types/three": "^0.103.2",
+    "@typescript-eslint/eslint-plugin": "^2.8.0",
+    "@typescript-eslint/eslint-plugin-tslint": "^2.8.0",
+    "@typescript-eslint/parser": "^2.8.0",
+    "eslint": "^6.7.0",
+    "eslint-config-prettier": "^6.7.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "husky": "^3.1.0",
+    "prettier": "^1.19.1",
+    "standard-version": "^7.0.1",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.7.2"
+  },
+  "dependencies": {
+    "three": "^0.110.0"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  }
+}
