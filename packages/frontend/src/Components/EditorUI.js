@@ -10,7 +10,8 @@ import {
   Mesh,
   SphereGeometry,
   BoxGeometry,
-  ConeGeometry
+  ConeGeometry,
+    Vector2
 } from "three";
 
 class EditorUI extends React.Component {
@@ -29,6 +30,13 @@ class EditorUI extends React.Component {
     this.WIDTH = this.imageCanvas.width;
     this.HEIGHT = this.imageCanvas.height;
 
+      var mouse = new Vector2();
+      this.editorCanvas.addEventListener( 'click', (event)=> {
+          mouse.x = ( (event.clientX - 74) / this.WIDTH ) * 2 - 1;
+          mouse.y = - ( (event.clientY -75) / this.HEIGHT ) * 2 + 1;
+          this.EDITOR.selectObjects(mouse);
+      }, false );
+
     this.EDITOR = new Editor();
     this.EDITOR.initialize();
 
@@ -40,8 +48,8 @@ class EditorUI extends React.Component {
       requestAnimationFrame(animate);
       this.EDITOR.render();
     };
-    animate();
 
+    animate();
   }
 
   renderScene = () => {

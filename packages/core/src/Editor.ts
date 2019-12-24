@@ -7,7 +7,10 @@ import {
   PointLight,
   WebGLRenderer,
   Object3D,
-  SphereGeometry
+  SphereGeometry,
+  Vector2,
+  Raycaster,
+  GridHelper
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { TransformControls } from "three/examples/jsm/controls/TransformControls";
@@ -24,12 +27,14 @@ export default class Editor {
   private isControllingLight = false;
   private helpers: Object3D[] = [];
   private objectLoader: ObjectUploader;
+  private rayCaster: Raycaster;
 
   public initialize(): void {
     this.editorCanvas = document.querySelector("#editorCanvas");
     this.threeScene = new THREE.Scene();
     this.objectLoader = new ObjectUploader(this);
     this.renderingScene = new Scene();
+    this.rayCaster = new Raycaster();
 
     this.camera = new THREE.PerspectiveCamera(
       75,
@@ -67,12 +72,9 @@ export default class Editor {
     this.helpers.push(gridHelper);
 
     this.orbitControls.update();
+  }
 
-    this.transformControls = new TransformControls(
-      this.camera,
-      this.renderer.domElement
-    );
-
+  public attachTransformController(): void {
     // Prevent camera and transfrom controls from interviening
     this.transformControls.addEventListener("dragging-changed", event => {
       this.orbitControls.enabled = !event.value;
@@ -95,10 +97,56 @@ export default class Editor {
         );
       }
     });
+
+    // @ts-ignore
+    window.addEventListener("keydown", event => {
+      switch (event.keyCode) {
+        case 81: // Q
+          this.transformControls.setSpace(
+            this.transformControls.space === "local" ? "world" : "local"
+          );
+          break;
+        case 17: // Ctrl
+          this.transformControls.setTranslationSnap(100);
+          this.transformControls.setRotationSnap(THREE.Math.degToRad(15));
+          break;
+        case 87: // W
+          this.transformControls.setMode("translate");
+          break;
+        case 69: // E
+          this.transformControls.setMode("rotate");
+          break;
+        case 82: // R
+          this.transformControls.setMode("scale");
+          break;
+        case 187:
+        case 107: // +, =, num+
+          this.transformControls.setSize(this.transformControls.size + 0.1);
+          break;
+        case 189:
+        case 109: // -, _, num-
+          this.transformControls.setSize(
+            Math.max(this.transformControls.size - 0.1, 0.1)
+          );
+          break;
+        case 88: // X
+          this.transformControls.showX = !this.transformControls.showX;
+          break;
+        case 89: // Y
+          this.transformControls.showY = !this.transformControls.showY;
+          break;
+        case 90: // Z
+          this.transformControls.showZ = !this.transformControls.showZ;
+          break;
+        case 32: // Spacebar
+          this.transformControls.enabled = !this.transformControls.enabled;
+          break;
+      }
+    });
   }
 
   public back(): void {
-    this.threeScene.add(...this.helpers)
+    this.threeScene.add(...this.helpers);
   }
 
   private syncRenderingCamera(): void {
@@ -162,6 +210,11 @@ export default class Editor {
   public addObjectToScene(object: Object3D): void {
     this.threeScene.add(object);
     this.renderingScene.addObject(object as THREE.Mesh);
+    this.transformControls = new TransformControls(
+      this.camera,
+      this.renderer.domElement
+    );
+    this.attachTransformController();
     this.transformControls.attach(object);
     this.threeScene.add(this.transformControls);
     this.isControllingLight = false;
@@ -202,13 +255,39 @@ export default class Editor {
     };
 
     // @ts-ignore
-    const type = (files[0].name as string).split(".");
+    const type = files[0].name.split(".");
     if (type[1] === "obj") {
       // @ts-ignore
       reader.readAsArrayBuffer(files[0]);
     } else if (type[1] === "mtl") {
       // @ts-ignore
       reader.readAsText(files[0]);
+    }
+  }
+
+  public selectObjects(mouseClickedPosition: Vector2): void {
+    this.rayCaster.setFromCamera(mouseClickedPosition, this.camera);
+
+    const objects = this.threeScene.children.filter((value: any) => {
+      if (!(value instanceof GridHelper)) {
+        return value;
+      }
+    });
+
+    const intersects = this.rayCaster.intersectObjects(objects)[0];
+
+    if (intersects !== undefined) {
+      this.threeScene.remove(this.transformControls);
+      this.transformControls.detach();
+      this.transformControls.dispose();
+
+      this.transformControls = new TransformControls(
+        this.camera,
+        this.renderer.domElement
+      );
+      this.attachTransformController();
+      this.transformControls.attach(intersects.object);
+      this.threeScene.add(this.transformControls);
     }
   }
 
