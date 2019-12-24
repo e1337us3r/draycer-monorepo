@@ -30,10 +30,15 @@ class EditorUI extends React.Component {
     this.WIDTH = this.imageCanvas.width;
     this.HEIGHT = this.imageCanvas.height;
 
+
     const mouse = new Vector2();
     this.editorCanvas.addEventListener( 'click', (event)=> {
-          mouse.x = ( (event.clientX - 74) / this.WIDTH ) * 2 - 1;
-          mouse.y = - ( (event.clientY -75) / this.HEIGHT ) * 2 + 1;
+        const rect = this.editorCanvas.getBoundingClientRect();
+        const clientX = event.clientX - rect.left;
+        const clientY = event.clientY - rect.top;
+
+          mouse.x = ( clientX / this.editorCanvas.clientWidth) * 2 - 1;
+          mouse.y = - ( clientY / this.editorCanvas.clientHeight ) * 2 + 1;
           this.EDITOR.selectObjects(mouse);
       }, false );
 
