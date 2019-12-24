@@ -1,4 +1,3 @@
-import Scene from "./utils/Scene";
 import * as THREE from "three";
 import {
   AmbientLight,
@@ -7,29 +6,30 @@ import {
   PointLight,
   WebGLRenderer,
   Object3D,
-  SphereGeometry
+  SphereGeometry, Scene
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { TransformControls } from "three/examples/jsm/controls/TransformControls";
 import ObjectUploader from "./ObjectUploader";
 
 export default class Editor {
+  public static NAME_AMBIENT = "ambient";
+  public static NAME_LIGHT = "light";
+  public static NAME_CAMERA = "camera";
+
   private editorCanvas: HTMLCanvasElement;
-  private threeScene: THREE.Scene;
-  private renderingScene: Scene;
+  private scene: Scene;
   private orbitControls: OrbitControls;
   private transformControls: TransformControls;
   private renderer: WebGLRenderer;
   private camera: PerspectiveCamera;
-  private isControllingLight = false;
   private helpers: Object3D[] = [];
   private objectLoader: ObjectUploader;
 
   public initialize(): void {
     this.editorCanvas = document.querySelector("#editorCanvas");
-    this.threeScene = new THREE.Scene();
+    this.scene = new THREE.Scene();
     this.objectLoader = new ObjectUploader(this);
-    this.renderingScene = new Scene();
 
     this.camera = new THREE.PerspectiveCamera(
       75,
@@ -37,6 +37,8 @@ export default class Editor {
       0.1,
       1000
     );
+
+    this.camera.name = Editor.NAME_CAMERA;
 
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -63,7 +65,7 @@ export default class Editor {
     this.camera.position.set(-5, 0, 0);
 
     const gridHelper = new THREE.GridHelper(5, 10);
-    this.threeScene.add(gridHelper);
+    this.scene.add(gridHelper);
     this.helpers.push(gridHelper);
 
     this.orbitControls.update();
@@ -76,118 +78,52 @@ export default class Editor {
     // Prevent camera and transfrom controls from interviening
     this.transformControls.addEventListener("dragging-changed", event => {
       this.orbitControls.enabled = !event.value;
-      // Update transformed objects position in scene
-      if (this.isControllingLight === true) {
-        this.renderingScene.lights[
-          this.renderingScene.lights.length - 1
-        ].position.set(
-          this.transformControls.object.position.x,
-          this.transformControls.object.position.y,
-          this.transformControls.object.position.z
-        );
-      } else {
-        this.renderingScene.objects[
-          this.renderingScene.objects.length - 1
-        ].position.set(
-          this.transformControls.object.position.x,
-          this.transformControls.object.position.y,
-          this.transformControls.object.position.z
-        );
-      }
     });
   }
 
   public back(): void {
-    this.threeScene.add(...this.helpers)
-  }
-
-  private syncRenderingCamera(): void {
-    this.renderingScene.camera = new THREE.Vector3(
-      this.camera.position.x,
-      this.camera.position.y,
-      this.camera.position.z
-    );
-
-    let vector = new THREE.Vector3();
-    const zNearPlane = 0.1;
-
-    // Top left corner
-    vector.set(-1, 1, zNearPlane).unproject(this.camera);
-    this.renderingScene.imagePlane.topLeft = new THREE.Vector3(
-      vector.x,
-      vector.y,
-      vector.z
-    );
-    vector = new THREE.Vector3();
-    // Top right corner
-    vector.set(1, 1, zNearPlane).unproject(this.camera);
-    this.renderingScene.imagePlane.topRight = new THREE.Vector3(
-      vector.x,
-      vector.y,
-      vector.z
-    );
-    vector = new THREE.Vector3();
-    // Bottom left corner
-    vector.set(-1, -1, zNearPlane).unproject(this.camera);
-
-    this.renderingScene.imagePlane.bottomLeft = new THREE.Vector3(
-      vector.x,
-      vector.y,
-      vector.z
-    );
-    vector = new THREE.Vector3();
-    // Bottom right corner
-    vector.set(1, -1, zNearPlane).unproject(this.camera);
-
-    this.renderingScene.imagePlane.bottomRight = new THREE.Vector3(
-      vector.x,
-      vector.y,
-      vector.z
-    );
+    this.scene.add(...this.helpers)
   }
 
   public getRenderingScene(): Scene {
-    this.syncRenderingCamera();
     // These object are for setting up the scene, should not be rendered
-    this.threeScene.remove(...this.helpers);
-    this.threeScene.remove(this.transformControls);
-    console.log(this.threeScene.children);
-    return this.renderingScene;
+    this.scene.remove(...this.helpers);
+    this.scene.remove(this.transformControls);
+    console.log(this.scene.children);
+    return this.scene;
   }
 
   public getRenderingSceneThree(): THREE.Scene {
-    return this.threeScene;
+    return this.scene;
   }
 
   public addObjectToScene(object: Object3D): void {
-    this.threeScene.add(object);
-    this.renderingScene.addObject(object as THREE.Mesh);
+    this.scene.add(object);
     this.transformControls.attach(object);
-    this.threeScene.add(this.transformControls);
-    this.isControllingLight = false;
+    this.scene.add(this.transformControls);
   }
 
   public addLightToScene(light: Light): void {
-    this.threeScene.add(light);
     if (light instanceof PointLight) {
-      this.renderingScene.addLight(light);
+      light.name = Editor.NAME_LIGHT;
 
       // Add temp object to control light position
-      const lightObj = new SphereGeometry(0.5);
+      const lightObj = new SphereGeometry(0.2);
       const material = new THREE.MeshPhongMaterial({
         color: 0xffff00,
         reflectivity: 1
       });
       const lightMesh = new THREE.Mesh(lightObj, material);
       this.helpers.push(lightMesh);
-      this.threeScene.add(lightMesh);
+      this.scene.add(lightMesh);
       this.transformControls.attach(lightMesh);
-      this.threeScene.add(this.transformControls);
+      this.scene.add(this.transformControls);
 
-      this.isControllingLight = true;
     } else if (light instanceof AmbientLight) {
-      this.renderingScene.ia = light;
+      light.name = Editor.NAME_AMBIENT;
     }
+
+    this.scene.add(light);
   }
 
   public uploadObjectToScene(files: File[]): void {
@@ -214,6 +150,6 @@ export default class Editor {
 
   public render(): void {
     this.orbitControls.update();
-    this.renderer.render(this.threeScene, this.camera);
+    this.renderer.render(this.scene, this.camera);
   }
 }
