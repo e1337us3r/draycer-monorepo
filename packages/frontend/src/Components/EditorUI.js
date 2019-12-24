@@ -9,19 +9,17 @@ import {
   MeshPhongMaterial,
   Mesh,
   SphereGeometry,
-  CylinderGeometry,
-  BoxGeometry
+  BoxGeometry,
+  ConeGeometry
 } from "three";
 
 class EditorUI extends React.Component {
   constructor() {
     super();
 
-    this.addSphere = this.addSphere.bind(this);
-    this.addLight = this.addLight.bind(this);
-    this.renderScene = this.renderScene.bind(this);
-    this.addCube = this.addCube.bind(this);
-    this.addPyramid = this.addPyramid.bind(this);
+    this.state = {
+      showResult: false
+    };
   }
   componentDidMount() {
     //if (!firebase.auth().currentUser) history.push("/login");
@@ -43,17 +41,16 @@ class EditorUI extends React.Component {
       this.EDITOR.render();
     };
     animate();
+
   }
 
-  renderScene() {
+  renderScene = () => {
     const tracer = new RayTracer(
       this.EDITOR.getRenderingScene(),
       this.EDITOR.getRenderingSceneThree(),
       this.WIDTH,
       this.HEIGHT
     );
-    this.editorCanvas.style.display = "none";
-    this.imageCanvas.style.display = "block";
     const image = new Image(this.imageCanvas);
     for (let y = 0; y < this.HEIGHT; y++) {
       for (let x = 0; x < this.WIDTH; x++) {
@@ -63,11 +60,13 @@ class EditorUI extends React.Component {
           Utils.imageColorFromColor(tracer.tracedValueAtPixel(x, y))
         );
       }
+      image.renderInto(this.imageCanvas);
     }
-    image.renderInto(this.imageCanvas);
-  }
 
-  addSphere() {
+    this.setState({ showResult: true });
+  };
+
+  addSphere = () => {
     const object = new SphereGeometry(1, 20, 20);
     const material = new MeshPhongMaterial({
       color: 0x00ff00,
@@ -75,50 +74,49 @@ class EditorUI extends React.Component {
     });
     const sphere = new Mesh(object, material);
     sphere.position.set(0, 0, 0);
-    console.log(sphere);
     this.EDITOR.addObjectToScene(sphere);
-  }
+  };
 
-  addCube() {
+  addCube = () => {
     const object = new BoxGeometry(1, 1, 1);
 
     const material = new MeshPhongMaterial({
       color: 0x00ff00,
-      reflectivity: 1
+      reflectivity: 0.5
     });
     const cube = new Mesh(object, material);
     cube.position.set(0, 0, 0);
     this.EDITOR.addObjectToScene(cube);
-  }
+  };
 
-  addPyramid() {
-    const object = new CylinderGeometry(0, 2, 2, 4, 1);
+  addPyramid = () => {
+    const object = new ConeGeometry(1, 2, 5);
 
     const material = new MeshPhongMaterial({
       color: 0x00ff00,
-      reflectivity: 1
+      reflectivity: 0.5
     });
     const pyramid = new Mesh(object, material);
     pyramid.position.set(0, 0, 0);
     this.EDITOR.addObjectToScene(pyramid);
-  }
+  };
 
-  addLight() {
+  addLight = () => {
     const light = new PointLight(new Color(0.5, 0.5, 0.5), 0.8, 100);
     light.position.set(2, 2, 2);
     this.EDITOR.addLightToScene(light);
-  }
+  };
 
-  uploadSelectedModel(event) {
+  uploadSelectedModel = event => {
     this.EDITOR.uploadObjectToScene(event.target.files);
-  }
+  };
 
-  downloadRender(event) {
+  downloadRender = event => {
     event.target.href = this.imageCanvas.toDataURL("image/png");
-  }
-  openUploadDialog() {
+  };
+  openUploadDialog = () => {
     document.querySelector("#item-upload").click();
-  }
+  };
 
   render() {
     return (
@@ -126,8 +124,18 @@ class EditorUI extends React.Component {
         <div id="editor" className="container">
           <div className="row">
             <div id="stage" className="col-md-10">
-              <canvas id="editorCanvas" width="900" height="600" />
-              <canvas id="imageCanvas" width="900" height="600" />
+              <canvas
+                id="editorCanvas"
+                width="900"
+                height="600"
+                hidden={this.state.showResult}
+              />
+              <canvas
+                id="imageCanvas"
+                width="900"
+                height="600"
+                hidden={!this.state.showResult}
+              />
             </div>
             <div id="toolbar" className="col-md-2">
               <div className="row">
@@ -186,23 +194,44 @@ class EditorUI extends React.Component {
                 </div>
               </div>
             </div>
+            <div className="row" style={{ padding: "15px" }}>
+              <div className="col-md-4">
+                <button
+                  id="btn-render"
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    this.setState({showResult: false});
+                    this.EDITOR.back();
+                  }}
+                  hidden={!this.state.showResult}
+                >
+                  Back
+                </button>
+              </div>
+              <div className="col-md-4">
+                <a
+                  href="#"
+                  className="btn btn-info"
+                  id="btn-download"
+                  download="result.png"
+                  onClick={this.downloadRender}
+                  hidden={!this.state.showResult}
+                >
+                  Download
+                </a>
+              </div>
+              <div className="col-md-4">
+                <button
+                  id="btn-render"
+                  className="btn btn-primary"
+                  onClick={this.renderScene}
+                  hidden={this.state.showResult}
+                >
+                  Render
+                </button>
+              </div>
+            </div>
           </div>
-          <button
-            id="btn-render"
-            className="btn btn-primary"
-            onClick={this.renderScene}
-          >
-            Render
-          </button>
-          <a
-            href="#"
-            className="btn btn-primary"
-            id="btn-download"
-            download="result.png"
-            onClick={this.downloadRender}
-          >
-            Download
-          </a>
         </div>
       </div>
     );

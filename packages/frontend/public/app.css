@@ -50,15 +50,6 @@ input {
     position: absolute;
 }
 
-#btn-render {
-    display: block;
-    float: none;
-}
-
-#imageCanvas {
-    display: none;
-}
-
 #toolbar {
     background: rgb(231, 231, 231);
     float: right;
