@@ -97,6 +97,10 @@ export default class Editor {
     });
   }
 
+  public back(): void {
+    this.threeScene.add(...this.helpers)
+  }
+
   private syncRenderingCamera(): void {
     this.renderingScene.camera = new THREE.Vector3(
       this.camera.position.x,
@@ -169,7 +173,7 @@ export default class Editor {
       this.renderingScene.addLight(light);
 
       // Add temp object to control light position
-      const lightObj = new SphereGeometry(1);
+      const lightObj = new SphereGeometry(0.5);
       const material = new THREE.MeshPhongMaterial({
         color: 0xffff00,
         reflectivity: 1
