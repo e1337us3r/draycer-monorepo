@@ -1,6 +1,14 @@
-import Scene from "./utils/Scene";
 import * as THREE from "three";
-import { Color, PointLight, Ray, Mesh, Intersection, Vector3 } from "three";
+import {
+  Color,
+  Mesh,
+  Intersection,
+  Vector3,
+  AmbientLight,
+  Light,
+  Camera
+} from "three";
+import Editor from "./Editor";
 
 const MAX_BOUNCES = 3;
 const NUM_SAMPLES_PER_DIRECTION = 2;
@@ -8,27 +16,32 @@ const NUM_SAMPLES_PER_PIXEL =
   NUM_SAMPLES_PER_DIRECTION * NUM_SAMPLES_PER_DIRECTION;
 
 export default class RayTracer {
-  private scene: Scene;
   private threeScene: THREE.Scene;
   private readonly w: number;
   private readonly h: number;
   private readonly raycaster: THREE.Raycaster;
   private readonly ambient: Color;
+  private readonly camera: Camera;
+  private readonly lights: Light[] = [];
 
-  public constructor(
-    scene: Scene,
-    threeScene: THREE.Scene,
-    w: number,
-    h: number
-  ) {
-    this.scene = scene;
+  public constructor(threeScene: THREE.Scene, w: number, h: number) {
     this.threeScene = threeScene;
     this.w = w;
     this.h = h;
+
     // Optimization for ambient light calculations
-    this.ambient = scene.ia.color.clone().multiplyScalar(scene.ia.intensity);
+    const ambient = threeScene.getObjectByName(
+      Editor.NAME_AMBIENT
+    ) as AmbientLight;
+    this.ambient = ambient.color.clone().multiplyScalar(ambient.intensity);
+
+    for (let obj of threeScene.children) {
+      if (obj instanceof Light) this.lights.push(obj);
+    }
 
     this.raycaster = new THREE.Raycaster();
+
+    this.camera = threeScene.getObjectByName(Editor.NAME_CAMERA) as Camera;
   }
 
   public tracedValueAtPixel(x: number, y: number): Color {
@@ -97,14 +110,14 @@ export default class RayTracer {
     const material = (intersection.object as THREE.Mesh)
       .material as THREE.MeshPhongMaterial;
 
-    const v = this.scene.camera
+    const v = this.camera.position
       .clone()
       .sub(intersection.point)
       .normalize();
 
     const normal = this.getNormalFromIntersection(intersection);
 
-    this.scene.lights.forEach(light => {
+    this.lights.forEach(light => {
       const l = light.position
         .clone()
         .sub(intersection.point)
@@ -154,7 +167,7 @@ export default class RayTracer {
 
   private isPointInShadowFromLight(
     point: THREE.Vector3,
-    light: PointLight
+    light: Light
   ): boolean {
     const shadowRay = new THREE.Ray(point, light.position.clone().sub(point));
 
@@ -167,29 +180,9 @@ export default class RayTracer {
   }
 
   private rayForPixel(x: number, y: number): THREE.Ray {
-    const xt = x / this.w;
-    const yt = (this.h - y - 1) / this.h;
+    this.raycaster.setFromCamera({ x, y }, this.camera);
 
-    const top = new THREE.Vector3().lerpVectors(
-      this.scene.imagePlane.topLeft,
-      this.scene.imagePlane.topRight,
-      xt
-    );
-
-    const bottom = new THREE.Vector3().lerpVectors(
-      this.scene.imagePlane.bottomLeft,
-      this.scene.imagePlane.bottomRight,
-      xt
-    );
-
-    const point = new THREE.Vector3().lerpVectors(bottom, top, yt);
-    return new THREE.Ray(
-      point,
-      point
-        .clone()
-        .sub(this.scene.camera)
-        .normalize()
-    );
+    return this.raycaster.ray;
   }
 
   private getNormalFromIntersection(intersection: Intersection): Vector3 {
