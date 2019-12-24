@@ -38,10 +38,10 @@ class EditorUI extends React.Component {
       }, false );
 
     this.EDITOR = new Editor();
-    this.EDITOR.initialize();
+    this.EDITOR.initialize(this.editorCanvas);
 
     this.EDITOR.addLightToScene(
-      new AmbientLight(new Color(0.1, 0.1, 0.1), 0.5)
+      new AmbientLight(new Color(0.1, 0.1, 0.1), 0.8)
     );
 
     const animate = () => {
@@ -77,7 +77,7 @@ class EditorUI extends React.Component {
     const object = new SphereGeometry(1, 20, 20);
     const material = new MeshPhongMaterial({
       color: 0x00ff00,
-      reflectivity: 0.5
+      reflectivity: 0.2
     });
     const sphere = new Mesh(object, material);
     sphere.position.set(0, 0, 0);
@@ -89,7 +89,7 @@ class EditorUI extends React.Component {
 
     const material = new MeshPhongMaterial({
       color: 0x00ff00,
-      reflectivity: 0.5
+      reflectivity: 0.2
     });
     const cube = new Mesh(object, material);
     cube.position.set(0, 0, 0);
@@ -101,7 +101,7 @@ class EditorUI extends React.Component {
 
     const material = new MeshPhongMaterial({
       color: 0x00ff00,
-      reflectivity: 0.5
+      reflectivity: 0.2
     });
     const pyramid = new Mesh(object, material);
     pyramid.position.set(0, 0, 0);

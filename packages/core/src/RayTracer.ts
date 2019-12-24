@@ -6,7 +6,7 @@ import {
   Vector3,
   AmbientLight,
   Light,
-  Camera
+  PerspectiveCamera
 } from "three";
 import Editor from "./Editor";
 
@@ -21,8 +21,9 @@ export default class RayTracer {
   private readonly h: number;
   private readonly raycaster: THREE.Raycaster;
   private readonly ambient: Color;
-  private readonly camera: Camera;
+  private readonly camera: PerspectiveCamera;
   private readonly lights: Light[] = [];
+  private imagePlane: any;
 
   public constructor(threeScene: THREE.Scene, w: number, h: number) {
     this.threeScene = threeScene;
@@ -36,12 +37,16 @@ export default class RayTracer {
     this.ambient = ambient.color.clone().multiplyScalar(ambient.intensity);
 
     for (let obj of threeScene.children) {
-      if (obj instanceof Light) this.lights.push(obj);
+      if (obj.name === Editor.NAME_LIGHT) {
+        this.lights.push(obj as Light);
+      }
     }
 
     this.raycaster = new THREE.Raycaster();
 
-    this.camera = threeScene.getObjectByName(Editor.NAME_CAMERA) as Camera;
+    this.camera = threeScene.getObjectByName(Editor.NAME_CAMERA) as PerspectiveCamera;
+
+    this.imagePlane = this.calculateImagePlane();
   }
 
   public tracedValueAtPixel(x: number, y: number): Color {
@@ -50,7 +55,7 @@ export default class RayTracer {
     for (let dx = 0; dx < NUM_SAMPLES_PER_DIRECTION; dx++) {
       for (let dy = 0; dy < NUM_SAMPLES_PER_DIRECTION; dy++) {
         const ray = this.rayForPixel(
-          x + dx / NUM_SAMPLES_PER_DIRECTION,
+          (x + dx / NUM_SAMPLES_PER_DIRECTION),
           y + dy / NUM_SAMPLES_PER_DIRECTION
         );
 
@@ -180,10 +185,74 @@ export default class RayTracer {
   }
 
   private rayForPixel(x: number, y: number): THREE.Ray {
-    this.raycaster.setFromCamera({ x, y }, this.camera);
 
-    return this.raycaster.ray;
+    const xt = x / this.w;
+    const yt = (this.h - y - 1) / this.h;
+
+    const top = new THREE.Vector3().lerpVectors(
+      this.imagePlane.topLeft,
+      this.imagePlane.topRight,
+      xt
+    );
+
+    const bottom = new THREE.Vector3().lerpVectors(
+      this.imagePlane.bottomLeft,
+      this.imagePlane.bottomRight,
+      xt
+    );
+
+    const point = new THREE.Vector3().lerpVectors(bottom, top, yt);
+    return new THREE.Ray(
+      point,
+      point
+        .clone()
+        .sub(this.camera.position)
+        .normalize()
+    );
   }
+
+  private calculateImagePlane(): object {
+    const imagePlane:any = {};
+    let vector = new THREE.Vector3();
+    const zNearPlane = 0.1;
+
+    // Top left corner
+    vector.set(-1, 1, zNearPlane).unproject(this.camera);
+    imagePlane.topLeft = new THREE.Vector3(
+      vector.x,
+      vector.y,
+      vector.z
+    );
+    vector = new THREE.Vector3();
+    // Top right corner
+    vector.set(1, 1, zNearPlane).unproject(this.camera);
+    imagePlane.topRight = new THREE.Vector3(
+      vector.x,
+      vector.y,
+      vector.z
+    );
+    vector = new THREE.Vector3();
+    // Bottom left corner
+    vector.set(-1, -1, zNearPlane).unproject(this.camera);
+
+    imagePlane.bottomLeft = new THREE.Vector3(
+      vector.x,
+      vector.y,
+      vector.z
+    );
+    vector = new THREE.Vector3();
+    // Bottom right corner
+    vector.set(1, -1, zNearPlane).unproject(this.camera);
+
+    imagePlane.bottomRight = new THREE.Vector3(
+      vector.x,
+      vector.y,
+      vector.z
+    );
+
+    return imagePlane;
+  }
+
 
   private getNormalFromIntersection(intersection: Intersection): Vector3 {
     const mesh = intersection.object as Mesh;

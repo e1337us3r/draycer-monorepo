@@ -20,6 +20,7 @@ export default class Editor {
   public static NAME_AMBIENT = "ambient";
   public static NAME_LIGHT = "light";
   public static NAME_CAMERA = "camera";
+  public static NAME_LIGHT_HELPER = "light_helper";
 
   private editorCanvas: HTMLCanvasElement;
   private scene: Scene;
@@ -31,8 +32,8 @@ export default class Editor {
   private objectLoader: ObjectUploader;
   private rayCaster: Raycaster;
 
-  public initialize(): void {
-    this.editorCanvas = document.querySelector("#editorCanvas");
+  public initialize(editorCanvas: HTMLCanvasElement): void {
+    this.editorCanvas = editorCanvas;
     this.scene = new THREE.Scene();
     this.objectLoader = new ObjectUploader(this);
     this.rayCaster = new Raycaster();
@@ -45,6 +46,7 @@ export default class Editor {
     );
 
     this.camera.name = Editor.NAME_CAMERA;
+    this.scene.add(this.camera);
 
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -75,13 +77,42 @@ export default class Editor {
     this.helpers.push(gridHelper);
 
     this.orbitControls.update();
+
+
+    this.transformControls = new TransformControls(
+      this.camera,
+      this.renderer.domElement
+    );
   }
 
-  public attachTransformController(): void {
+  public attachTransformController(object: Object3D): void {
+
+    this.scene.remove(this.transformControls);
+    this.transformControls.detach();
+    this.transformControls.dispose();
+
+    this.transformControls = new TransformControls(
+      this.camera,
+      this.renderer.domElement
+    );
+
     // Prevent camera and transfrom controls from interviening
     this.transformControls.addEventListener("dragging-changed", event => {
       this.orbitControls.enabled = !event.value;
+
+      if (object.name === Editor.NAME_LIGHT_HELPER)
+        {
+          // @ts-ignore
+          object.light.position.set(
+                    object.position.x,
+                    object.position.y,
+                    object.position.z,
+                    )
+        }
     });
+
+    this.transformControls.attach(object);
+    this.scene.add(this.transformControls);
 
     // @ts-ignore
     window.addEventListener("keydown", event => {
@@ -131,7 +162,7 @@ export default class Editor {
   }
 
   public back(): void {
-    this.scene.add(...this.helpers)
+    this.scene.add(...this.helpers);
   }
 
   public getRenderingScene(): Scene {
@@ -148,13 +179,8 @@ export default class Editor {
 
   public addObjectToScene(object: Object3D): void {
     this.scene.add(object);
-    this.transformControls = new TransformControls(
-      this.camera,
-      this.renderer.domElement
-    );
-    this.attachTransformController();
-    this.transformControls.attach(object);
-    this.scene.add(this.transformControls);
+
+    this.attachTransformController(object);
   }
 
   public addLightToScene(light: Light): void {
@@ -168,11 +194,15 @@ export default class Editor {
         reflectivity: 1
       });
       const lightMesh = new THREE.Mesh(lightObj, material);
-      this.helpers.push(lightMesh);
-      this.scene.add(lightMesh);
-      this.transformControls.attach(lightMesh);
-      this.scene.add(this.transformControls);
 
+      // add light to mesh so that it can later be associated
+      // @ts-ignore
+      lightMesh.light = light;
+      lightMesh.name = Editor.NAME_LIGHT_HELPER;
+
+      this.helpers.push(lightMesh);
+
+      this.addObjectToScene(lightMesh)
     } else if (light instanceof AmbientLight) {
       light.name = Editor.NAME_AMBIENT;
     }
@@ -214,17 +244,7 @@ export default class Editor {
     const intersects = this.rayCaster.intersectObjects(objects)[0];
 
     if (intersects !== undefined) {
-      this.scene.remove(this.transformControls);
-      this.transformControls.detach();
-      this.transformControls.dispose();
-
-      this.transformControls = new TransformControls(
-        this.camera,
-        this.renderer.domElement
-      );
-      this.attachTransformController();
-      this.transformControls.attach(intersects.object);
-      this.scene.add(this.transformControls);
+      this.attachTransformController(intersects.object);
     }
   }
 
