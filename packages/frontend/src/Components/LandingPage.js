@@ -4,7 +4,7 @@ import history from "./history";
 import { Link } from "react-router-dom";
 import { Button } from "@material-ui/core";
 const LandingPage = () => {
-    if (!firebase.auth().currentUser) history.push("/login");
+    if (firebase.auth().currentUser) history.push("/login");
     return (
         <div className="landing">
             <Link to="/editor">

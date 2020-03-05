@@ -8,6 +8,7 @@ import LandingPage from "./LandingPage";
 import NavBar from "./NavBar";
 import ViewTasks from "./ViewTasks";
 import Services from "./Services";
+import ViewTask from "./ViewTask";
 
 const App = () => {
     return (
@@ -21,6 +22,7 @@ const App = () => {
                 <Route path="/editor" exact component={Editor} />
                 <Route path="/tasks" exact component={ViewTasks} />
                 <Route path="/services" exact component={Services} />
+              <Route path="/task/:id" exact component={ViewTask} />
             </Switch>
         </Router>
     );

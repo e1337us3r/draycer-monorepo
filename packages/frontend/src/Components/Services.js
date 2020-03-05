@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -8,14 +8,68 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
+import socketIOClient from "socket.io-client";
+import CONFIG from "../config";
+import { RayTracer, SceneLoader} from "draycer";
+import greenlet from "greenlet";
+
 
 const useStyles = makeStyles({
     table: {
         minWidth: 650
     }
 });
+
+async function wait(ms) {
+    return new Promise((resolve, reject) => setTimeout(resolve,ms));
+}
+
 export default function Services() {
     const classes = useStyles();
+
+    useEffect(()=>{
+        const socket = socketIOClient(CONFIG.serverSocketUrl);
+
+        socket.on("START_RENDER", async (job) => {
+            console.log("EVENT: START_RENDER | id: " + job.id);
+
+            const scene = await SceneLoader.load(job.scene);
+
+            console.log("EVENT: SCENE_PARSED");
+
+            const tracer = new RayTracer(
+              scene,
+              job.width,
+              job.height
+            );
+            console.log(scene);
+            
+            for (let y = job.yStart; y < job.yEnd; y++) {
+                const renders = [];
+                for (let x = job.xStart; x < job.width; x++) {
+                   renders.push({
+                       coord: {x,y},
+                       color:
+                         tracer.tracedValueAtPixel(x, y)
+                   })
+                }
+                console.log(`EVENT: ROW_RENDERED | Y=${y}`);
+                socket.emit("ROW_RENDERED", {
+                    id: job.id,
+                    renders
+
+                })
+            }
+
+
+            console.log("EVENT: RENDER_COMPLETED");
+        });
+
+        return () => {
+            socket.disconnect();
+        }
+    },[]);
+
     return (
         <div>
             <TableContainer component={Paper} style={{ marginTop: "5%" }}>

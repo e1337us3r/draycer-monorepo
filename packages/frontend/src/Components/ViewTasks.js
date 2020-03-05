@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -7,14 +7,53 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
+import * as axios from "axios";
+import CONFIG from "../config";
+import history from "./history";
+import Button from "@material-ui/core/Button";
 
 const useStyles = makeStyles({
     table: {
         minWidth: 650
     }
 });
+
+function TaskList(props) {
+    return (
+      <TableBody>
+          {props.tasks.map((item, index) => {
+              const endDate = item.ended_at !== null ? new Date(item.ended_at) : new Date();
+              const timePastMin = (endDate.getTime() / 60000) - (new Date(item.started_at).getTime() / 60000);
+              return(
+            <TableRow key={item.id}>
+                <TableCell component="th" scope="row">
+                    {item.id}
+                </TableCell>
+                <TableCell align="right">Unknown</TableCell>
+                <TableCell align="right">{item.created_at}</TableCell>
+                <TableCell align="right">{Math.floor(timePastMin)} Min</TableCell>
+                <TableCell align="right">{item.status.toUpperCase()}</TableCell>
+                {(item.ended_at === null)?
+                  <TableCell  align="right">
+                      <Button onClick={()=>{history.push(`/task/${item.id}`)}} variant="contained" color="primary">
+                    View
+                </Button>
+                  </TableCell> : ""}
+
+            </TableRow>
+          );
+          })}
+      </TableBody>
+    );
+}
+
 export default function ViewTasks() {
     const classes = useStyles();
+    const [tasks, setTasks] = useState([]);
+
+    useEffect(()=>{
+        axios.get(CONFIG.serverUrl + "/scene").then(res => setTasks(res.data.results));
+    }, []);
     return (
         <TableContainer component={Paper} style={{ marginTop: "5%" }}>
             <Table className={classes.table} aria-label="simple table">
@@ -27,26 +66,7 @@ export default function ViewTasks() {
                         <TableCell align="right">Status</TableCell>
                     </TableRow>
                 </TableHead>
-                <TableBody>
-                    <TableRow>
-                        <TableCell component="th" scope="row">
-                            8382934
-                        </TableCell>
-                        <TableCell align="right">Movie #1</TableCell>
-                        <TableCell align="right">11.09.2019</TableCell>
-                        <TableCell align="right">3 days</TableCell>
-                        <TableCell align="right">Progress</TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell component="th" scope="row">
-                            7712123
-                        </TableCell>
-                        <TableCell align="right">Kitchen</TableCell>
-                        <TableCell align="right">09.09.2019</TableCell>
-                        <TableCell align="right">7 days</TableCell>
-                        <TableCell align="right">Completed</TableCell>
-                    </TableRow>
-                </TableBody>
+                <TaskList tasks={tasks}/>
             </Table>
         </TableContainer>
     );

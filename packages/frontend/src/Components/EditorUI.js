@@ -13,6 +13,8 @@ import {
   ConeGeometry,
     Vector2
 } from "three";
+import * as axios from "axios";
+import CONFIG from "../config";
 
 class EditorUI extends React.Component {
   constructor() {
@@ -57,8 +59,8 @@ class EditorUI extends React.Component {
     animate();
   }
 
-  renderScene = () => {
-    const tracer = new RayTracer(
+  renderScene = async () => {
+    /*const tracer = new RayTracer(
       this.EDITOR.getRenderingScene(),
       this.WIDTH,
       this.HEIGHT
@@ -69,13 +71,17 @@ class EditorUI extends React.Component {
         image.putPixel(
           x,
           y,
-          Utils.imageColorFromColor(tracer.tracedValueAtPixel(x, y))
+          tracer.tracedValueAtPixel(x, y)
         );
       }
       image.renderInto(this.imageCanvas);
-    }
+    }*/
 
-    this.setState({ showResult: true });
+    const scene = this.EDITOR.getRenderingScene().toJSON();
+
+    await axios.post(CONFIG.serverUrl + "/scene", {scene});
+
+    history.push("/tasks")
   };
 
   addSphere = () => {

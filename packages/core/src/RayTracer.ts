@@ -9,6 +9,7 @@ import {
   PerspectiveCamera
 } from "three";
 import Editor from "./Editor";
+import { Utils } from "./index";
 
 const MAX_BOUNCES = 3;
 const NUM_SAMPLES_PER_DIRECTION = 2;
@@ -36,7 +37,7 @@ export default class RayTracer {
     ) as AmbientLight;
     this.ambient = ambient.color.clone().multiplyScalar(ambient.intensity);
 
-    for (let obj of threeScene.children) {
+    for (const obj of threeScene.children) {
       if (obj.name === Editor.NAME_LIGHT) {
         this.lights.push(obj as Light);
       }
@@ -44,18 +45,23 @@ export default class RayTracer {
 
     this.raycaster = new THREE.Raycaster();
 
-    this.camera = threeScene.getObjectByName(Editor.NAME_CAMERA) as PerspectiveCamera;
+    this.camera = threeScene.getObjectByName(
+      Editor.NAME_CAMERA
+    ) as PerspectiveCamera;
 
     this.imagePlane = this.calculateImagePlane();
   }
 
-  public tracedValueAtPixel(x: number, y: number): Color {
+  public tracedValueAtPixel(
+    x: number,
+    y: number
+  ): { r: number; g: number; b: number } {
     const color = new Color(0, 0, 0);
 
     for (let dx = 0; dx < NUM_SAMPLES_PER_DIRECTION; dx++) {
       for (let dy = 0; dy < NUM_SAMPLES_PER_DIRECTION; dy++) {
         const ray = this.rayForPixel(
-          (x + dx / NUM_SAMPLES_PER_DIRECTION),
+          x + dx / NUM_SAMPLES_PER_DIRECTION,
           y + dy / NUM_SAMPLES_PER_DIRECTION
         );
 
@@ -64,7 +70,7 @@ export default class RayTracer {
       }
     }
 
-    return color;
+    return Utils.imageColorFromColor(color);
   }
 
   private tracedValueForRay(ray: THREE.Ray, depth: number): Color {
@@ -185,7 +191,6 @@ export default class RayTracer {
   }
 
   private rayForPixel(x: number, y: number): THREE.Ray {
-
     const xt = x / this.w;
     const yt = (this.h - y - 1) / this.h;
 
@@ -212,47 +217,30 @@ export default class RayTracer {
   }
 
   private calculateImagePlane(): object {
-    const imagePlane:any = {};
+    const imagePlane: any = {};
     let vector = new THREE.Vector3();
     const zNearPlane = 0.1;
 
     // Top left corner
     vector.set(-1, 1, zNearPlane).unproject(this.camera);
-    imagePlane.topLeft = new THREE.Vector3(
-      vector.x,
-      vector.y,
-      vector.z
-    );
+    imagePlane.topLeft = new THREE.Vector3(vector.x, vector.y, vector.z);
     vector = new THREE.Vector3();
     // Top right corner
     vector.set(1, 1, zNearPlane).unproject(this.camera);
-    imagePlane.topRight = new THREE.Vector3(
-      vector.x,
-      vector.y,
-      vector.z
-    );
+    imagePlane.topRight = new THREE.Vector3(vector.x, vector.y, vector.z);
     vector = new THREE.Vector3();
     // Bottom left corner
     vector.set(-1, -1, zNearPlane).unproject(this.camera);
 
-    imagePlane.bottomLeft = new THREE.Vector3(
-      vector.x,
-      vector.y,
-      vector.z
-    );
+    imagePlane.bottomLeft = new THREE.Vector3(vector.x, vector.y, vector.z);
     vector = new THREE.Vector3();
     // Bottom right corner
     vector.set(1, -1, zNearPlane).unproject(this.camera);
 
-    imagePlane.bottomRight = new THREE.Vector3(
-      vector.x,
-      vector.y,
-      vector.z
-    );
+    imagePlane.bottomRight = new THREE.Vector3(vector.x, vector.y, vector.z);
 
     return imagePlane;
   }
-
 
   private getNormalFromIntersection(intersection: Intersection): Vector3 {
     const mesh = intersection.object as Mesh;

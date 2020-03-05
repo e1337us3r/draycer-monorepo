@@ -169,7 +169,6 @@ export default class Editor {
     // These object are for setting up the scene, should not be rendered
     this.scene.remove(...this.helpers);
     this.scene.remove(this.transformControls);
-    console.log(this.scene.children);
     return this.scene;
   }
 
