@@ -10,8 +10,7 @@ import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
 import socketIOClient from "socket.io-client";
 import CONFIG from "../config";
-import { RayTracer, SceneLoader} from "draycer";
-import greenlet from "greenlet";
+import Worker from "../util/render.worker"
 
 
 const useStyles = makeStyles({
@@ -20,50 +19,33 @@ const useStyles = makeStyles({
     }
 });
 
-async function wait(ms) {
-    return new Promise((resolve, reject) => setTimeout(resolve,ms));
-}
-
 export default function Services() {
     const classes = useStyles();
 
     useEffect(()=>{
+
         const socket = socketIOClient(CONFIG.serverSocketUrl);
 
+        const worker = new Worker();
         socket.on("START_RENDER", async (job) => {
-            console.log("EVENT: START_RENDER | id: " + job.id);
+            console.log("EVENT: START_RENDER | id= " + job.id);
 
-            const scene = await SceneLoader.load(job.scene);
-
-            console.log("EVENT: SCENE_PARSED");
-
-            const tracer = new RayTracer(
-              scene,
-              job.width,
-              job.height
-            );
-            console.log(scene);
-            
-            for (let y = job.yStart; y < job.yEnd; y++) {
-                const renders = [];
-                for (let x = job.xStart; x < job.width; x++) {
-                   renders.push({
-                       coord: {x,y},
-                       color:
-                         tracer.tracedValueAtPixel(x, y)
-                   })
+            worker.onmessage = ({data}) => {
+                if (data.what === "ROW_RENDERED"){
+                    socket.emit("ROW_RENDERED", {
+                        id: data.id,
+                        renders: data.renders
+                    });
+                    console.log(`EVENT: ROW_RENDERED | id= ${job.id}| Y=${data.y}`);
                 }
-                console.log(`EVENT: ROW_RENDERED | Y=${y}`);
-                socket.emit("ROW_RENDERED", {
-                    id: job.id,
-                    renders
+            };
 
-                })
-            }
-
-
-            console.log("EVENT: RENDER_COMPLETED");
+            worker.postMessage({
+                what: "START_RENDER",
+                job
+            })
         });
+
 
         return () => {
             socket.disconnect();

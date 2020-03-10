@@ -24,6 +24,9 @@ function TaskList(props) {
           {props.tasks.map((item, index) => {
               const endDate = item.ended_at !== null ? new Date(item.ended_at) : new Date();
               const timePastMin = (endDate.getTime() / 60000) - (new Date(item.started_at).getTime() / 60000);
+              let percentage = "";
+              if (item.status === "rendering")
+                  percentage = ((item.renderedPixelCount/item.pixelCount)*100).toFixed(1);
               return(
             <TableRow key={item.id}>
                 <TableCell component="th" scope="row">
@@ -32,7 +35,7 @@ function TaskList(props) {
                 <TableCell align="right">Unknown</TableCell>
                 <TableCell align="right">{item.created_at}</TableCell>
                 <TableCell align="right">{Math.floor(timePastMin)} Min</TableCell>
-                <TableCell align="right">{item.status.toUpperCase()}</TableCell>
+                <TableCell align="right">{item.status.toUpperCase()} {(item.status === "rendering")? `${percentage}%` : "" } </TableCell>
                 {(item.ended_at === null)?
                   <TableCell  align="right">
                       <Button onClick={()=>{history.push(`/task/${item.id}`)}} variant="contained" color="primary">

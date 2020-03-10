@@ -32,21 +32,31 @@ export default class Editor {
   private objectLoader: ObjectUploader;
   private rayCaster: Raycaster;
 
-  public initialize(editorCanvas: HTMLCanvasElement): void {
+  public initialize(editorCanvas: HTMLCanvasElement, scene?: Scene): void {
     this.editorCanvas = editorCanvas;
-    this.scene = new THREE.Scene();
+    this.scene = scene ? scene : new THREE.Scene();
     this.objectLoader = new ObjectUploader(this);
     this.rayCaster = new Raycaster();
 
-    this.camera = new THREE.PerspectiveCamera(
-      75,
-      this.editorCanvas.width / this.editorCanvas.height,
-      0.1,
-      1000
-    );
+    if (scene) {
+      this.camera = scene.getObjectByName(
+        Editor.NAME_CAMERA
+      ) as PerspectiveCamera;
 
-    this.camera.name = Editor.NAME_CAMERA;
-    this.scene.add(this.camera);
+      // These attributes are missing from the exported camera obj and need to be set manually
+      this.camera.matrixWorld = this.camera.matrix;
+      this.camera.matrixWorldInverse = this.camera.userData.matrixWorldInverse;
+    } else {
+      this.camera = new THREE.PerspectiveCamera(
+        75,
+        this.editorCanvas.width / this.editorCanvas.height,
+        0.1,
+        1000
+      );
+
+      this.camera.name = Editor.NAME_CAMERA;
+      this.scene.add(this.camera);
+    }
 
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -78,7 +88,6 @@ export default class Editor {
 
     this.orbitControls.update();
 
-
     this.transformControls = new TransformControls(
       this.camera,
       this.renderer.domElement
@@ -86,7 +95,6 @@ export default class Editor {
   }
 
   public attachTransformController(object: Object3D): void {
-
     this.scene.remove(this.transformControls);
     this.transformControls.detach();
     this.transformControls.dispose();
@@ -100,15 +108,14 @@ export default class Editor {
     this.transformControls.addEventListener("dragging-changed", event => {
       this.orbitControls.enabled = !event.value;
 
-      if (object.name === Editor.NAME_LIGHT_HELPER)
-        {
-          // @ts-ignore
-          object.light.position.set(
-                    object.position.x,
-                    object.position.y,
-                    object.position.z,
-                    )
-        }
+      if (object.name === Editor.NAME_LIGHT_HELPER) {
+        // @ts-ignore
+        object.light.position.set(
+          object.position.x,
+          object.position.y,
+          object.position.z
+        );
+      }
     });
 
     this.transformControls.attach(object);
@@ -169,6 +176,11 @@ export default class Editor {
     // These object are for setting up the scene, should not be rendered
     this.scene.remove(...this.helpers);
     this.scene.remove(this.transformControls);
+
+    // This attribute does not get exported when toJSON() is called
+    // So it needs to be added manually
+    this.camera.userData.matrixWorldInverse = this.camera.matrixWorldInverse;
+
     return this.scene;
   }
 
@@ -194,14 +206,14 @@ export default class Editor {
       });
       const lightMesh = new THREE.Mesh(lightObj, material);
 
-      // add light to mesh so that it can later be associated
+      // Add light to mesh so that it can later be associated
       // @ts-ignore
       lightMesh.light = light;
       lightMesh.name = Editor.NAME_LIGHT_HELPER;
 
       this.helpers.push(lightMesh);
 
-      this.addObjectToScene(lightMesh)
+      this.addObjectToScene(lightMesh);
     } else if (light instanceof AmbientLight) {
       light.name = Editor.NAME_AMBIENT;
     }

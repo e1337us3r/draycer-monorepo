@@ -1,7 +1,7 @@
 import React from "react";
 import history from "./history";
 import firebase from "./auth/firebase";
-import { RayTracer, Image, Editor, Utils } from "draycer";
+import { Editor } from "draycer";
 import {
   AmbientLight,
   Color,
@@ -27,57 +27,45 @@ class EditorUI extends React.Component {
   componentDidMount() {
     //if (!firebase.auth().currentUser) history.push("/login");
 
-    this.imageCanvas = document.querySelector("#imageCanvas");
-    this.editorCanvas = document.querySelector("#editorCanvas");
-    this.WIDTH = this.imageCanvas.width;
-    this.HEIGHT = this.imageCanvas.height;
+    (async ()=> {
+      this.imageCanvas = document.querySelector("#imageCanvas");
+      this.editorCanvas = document.querySelector("#editorCanvas");
+      this.WIDTH = this.imageCanvas.width;
+      this.HEIGHT = this.imageCanvas.height;
 
 
-    const mouse = new Vector2();
-    this.editorCanvas.addEventListener( 'click', (event)=> {
+      const mouse = new Vector2();
+      this.editorCanvas.addEventListener( 'click', (event)=> {
         const rect = this.editorCanvas.getBoundingClientRect();
         const clientX = event.clientX - rect.left;
         const clientY = event.clientY - rect.top;
 
-          mouse.x = ( clientX / this.editorCanvas.clientWidth) * 2 - 1;
-          mouse.y = - ( clientY / this.editorCanvas.clientHeight ) * 2 + 1;
-          this.EDITOR.selectObjects(mouse);
+        mouse.x = ( clientX / this.editorCanvas.clientWidth) * 2 - 1;
+        mouse.y = - ( clientY / this.editorCanvas.clientHeight ) * 2 + 1;
+        this.EDITOR.selectObjects(mouse);
       }, false );
 
-    this.EDITOR = new Editor();
-    this.EDITOR.initialize(this.editorCanvas);
+      this.EDITOR = new Editor();
+      this.EDITOR.initialize(this.editorCanvas);
 
-    this.EDITOR.addLightToScene(
-      new AmbientLight(new Color(0.1, 0.1, 0.1), 0.8)
-    );
+      this.EDITOR.addLightToScene(
+        new AmbientLight(new Color(0.1, 0.1, 0.1), 0.8)
+      );
 
-    const animate = () => {
-      requestAnimationFrame(animate);
-      this.EDITOR.render();
-    };
+      const animate = () => {
+        requestAnimationFrame(animate);
+        this.EDITOR.render();
+      };
 
-    animate();
+      animate();
+    })()
+
   }
 
   renderScene = async () => {
-    /*const tracer = new RayTracer(
-      this.EDITOR.getRenderingScene(),
-      this.WIDTH,
-      this.HEIGHT
-    );
-    const image = new Image(this.imageCanvas);
-    for (let y = 0; y < this.HEIGHT; y++) {
-      for (let x = 0; x < this.WIDTH; x++) {
-        image.putPixel(
-          x,
-          y,
-          tracer.tracedValueAtPixel(x, y)
-        );
-      }
-      image.renderInto(this.imageCanvas);
-    }*/
-
     const scene = this.EDITOR.getRenderingScene().toJSON();
+    scene.WIDTH = this.WIDTH;
+    scene.HEIGHT = this.HEIGHT;
 
     await axios.post(CONFIG.serverUrl + "/scene", {scene});
 
