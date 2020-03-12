@@ -1,4 +1,3 @@
-import * as THREE from "three";
 import {
   AmbientLight,
   Light,
@@ -10,7 +9,11 @@ import {
   Scene,
   Vector2,
   Raycaster,
-  GridHelper
+  GridHelper,
+  PCFShadowMap,
+  MeshPhongMaterial,
+  Mesh,
+  Math as ThreeMath
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { TransformControls } from "three/examples/jsm/controls/TransformControls";
@@ -34,7 +37,7 @@ export default class Editor {
 
   public initialize(editorCanvas: HTMLCanvasElement, scene?: Scene): void {
     this.editorCanvas = editorCanvas;
-    this.scene = scene ? scene : new THREE.Scene();
+    this.scene = scene ? scene : new Scene();
     this.objectLoader = new ObjectUploader(this);
     this.rayCaster = new Raycaster();
 
@@ -47,7 +50,7 @@ export default class Editor {
       this.camera.matrixWorld = this.camera.matrix;
       this.camera.matrixWorldInverse = this.camera.userData.matrixWorldInverse;
     } else {
-      this.camera = new THREE.PerspectiveCamera(
+      this.camera = new PerspectiveCamera(
         75,
         this.editorCanvas.width / this.editorCanvas.height,
         0.1,
@@ -58,13 +61,13 @@ export default class Editor {
       this.scene.add(this.camera);
     }
 
-    this.renderer = new THREE.WebGLRenderer({
+    this.renderer = new WebGLRenderer({
       antialias: true,
       canvas: this.editorCanvas
     });
 
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFShadowMap;
+    this.renderer.shadowMap.type = PCFShadowMap;
 
     const gl = this.editorCanvas.getContext("webgl");
     // Set clear color to black, fully opaque
@@ -82,7 +85,7 @@ export default class Editor {
     );
     this.camera.position.set(-5, 0, 0);
 
-    const gridHelper = new THREE.GridHelper(5, 10);
+    const gridHelper = new GridHelper(5, 10);
     this.scene.add(gridHelper);
     this.helpers.push(gridHelper);
 
@@ -131,7 +134,7 @@ export default class Editor {
           break;
         case 17: // Ctrl
           this.transformControls.setTranslationSnap(100);
-          this.transformControls.setRotationSnap(THREE.Math.degToRad(15));
+          this.transformControls.setRotationSnap(ThreeMath.degToRad(15));
           break;
         case 87: // W
           this.transformControls.setMode("translate");
@@ -184,7 +187,7 @@ export default class Editor {
     return this.scene;
   }
 
-  public getRenderingSceneThree(): THREE.Scene {
+  public getRenderingSceneThree(): Scene {
     return this.scene;
   }
 
@@ -200,11 +203,11 @@ export default class Editor {
 
       // Add temp object to control light position
       const lightObj = new SphereGeometry(0.2);
-      const material = new THREE.MeshPhongMaterial({
+      const material = new MeshPhongMaterial({
         color: 0xffff00,
         reflectivity: 1
       });
-      const lightMesh = new THREE.Mesh(lightObj, material);
+      const lightMesh = new Mesh(lightObj, material);
 
       // Add light to mesh so that it can later be associated
       // @ts-ignore

@@ -1,9 +1,8 @@
 import React from "react";
 import history from "./history";
 import firebase from "./auth/firebase";
-import { Editor } from "draycer";
+import { Editor, RayTracer, Image } from "draycer";
 import {
-  AmbientLight,
   Color,
   PointLight,
   MeshPhongMaterial,
@@ -13,8 +12,10 @@ import {
   ConeGeometry,
     Vector2
 } from "three";
-import * as axios from "axios";
+import axios from "axios";
 import CONFIG from "../config";
+import ButtonGroup from "@material-ui/core/ButtonGroup";
+import Button from "@material-ui/core/Button";
 
 class EditorUI extends React.Component {
   constructor() {
@@ -48,10 +49,6 @@ class EditorUI extends React.Component {
       this.EDITOR = new Editor();
       this.EDITOR.initialize(this.editorCanvas);
 
-      this.EDITOR.addLightToScene(
-        new AmbientLight(new Color(0.1, 0.1, 0.1), 0.8)
-      );
-
       const animate = () => {
         requestAnimationFrame(animate);
         this.EDITOR.render();
@@ -62,14 +59,40 @@ class EditorUI extends React.Component {
 
   }
 
-  renderScene = async () => {
-    const scene = this.EDITOR.getRenderingScene().toJSON();
-    scene.WIDTH = this.WIDTH;
-    scene.HEIGHT = this.HEIGHT;
+  renderScene = async (option) => {
 
-    await axios.post(CONFIG.serverUrl + "/scene", {scene});
+    const scene = this.EDITOR.getRenderingScene();
+    console.log(scene);
+    const sceneJson = scene.toJSON();
+    sceneJson.WIDTH = this.WIDTH;
+    sceneJson.HEIGHT = this.HEIGHT;
 
-    history.push("/tasks")
+    if (option > 0)
+    await axios.post(CONFIG.serverUrl + "/scene", {scene: sceneJson});
+
+    if (option === 1)
+      history.push("/tasks");
+    else {
+      const tracer = new RayTracer(
+        scene,
+        this.WIDTH,
+        this.HEIGHT
+      );
+      const image = new Image(this.imageCanvas);
+      for (let y = 0; y < this.HEIGHT; y++) {
+        for (let x = 0; x < this.WIDTH; x++) {
+          image.putPixel(
+            x,
+            y,
+            tracer.tracedValueAtPixel(x, y)
+          );
+        }
+        image.renderInto(this.imageCanvas);
+      }
+
+      this.setState({showResult : true})
+    }
+
   };
 
   addSphere = () => {
@@ -200,10 +223,9 @@ class EditorUI extends React.Component {
                 </div>
               </div>
             </div>
-            <div className="row" style={{ padding: "15px" }}>
+            <div className="row col-md-10" style={{ padding: "15px" }}>
               <div className="col-md-4">
                 <button
-                  id="btn-render"
                   className="btn btn-secondary"
                   onClick={() => {
                     this.setState({showResult: false});
@@ -227,14 +249,17 @@ class EditorUI extends React.Component {
                 </a>
               </div>
               <div className="col-md-4">
-                <button
-                  id="btn-render"
-                  className="btn btn-primary"
-                  onClick={this.renderScene}
-                  hidden={this.state.showResult}
-                >
-                  Render
-                </button>
+                <ButtonGroup variant="contained" color="primary" aria-label="contained primary button group">
+                  <Button
+                    hidden={this.state.showResult}
+                    onClick={() => this.renderScene(0)}>Client Render</Button>
+                  <Button
+                    hidden={this.state.showResult}
+                    onClick={() => this.renderScene(1)}>Server Render</Button>
+                  <Button
+                    hidden={this.state.showResult}
+                    onClick={() => this.renderScene(2)}>Client & Server Render</Button>
+                </ButtonGroup>
               </div>
             </div>
           </div>

@@ -19,13 +19,17 @@ import {RayTracer, SceneLoader, Editor} from "draycer";
 
 
     const parsedScene = await SceneLoader.load(scene);
+    console.log("EVENT: SCENE_PARSED");
+
+    for(const obj of parsedScene.children) {
+      obj.matrixWorld = obj.matrix;
+    }
 
     const camera = parsedScene.getObjectByName(Editor.NAME_CAMERA);
     // These attributes are missing from the exported camera obj and need to be set manually
-    camera.matrixWorld = camera.matrix;
     camera.matrixWorldInverse = camera.userData.matrixWorldInverse;
 
-    console.log("EVENT: SCENE_PARSED");
+    console.log(parsedScene);
 
     const tracer = new RayTracer(
       parsedScene,
@@ -37,6 +41,8 @@ import {RayTracer, SceneLoader, Editor} from "draycer";
       const renders = [];
       for (let x = xStart; x < width; x++) {
         const color = tracer.tracedValueAtPixel(x, y);
+        if (color.g > 255 || color.g < 0 )
+          console.log(`X: ${x} Y: ${y} `, color);
         renders.push({
           coord: {x, y},
           color

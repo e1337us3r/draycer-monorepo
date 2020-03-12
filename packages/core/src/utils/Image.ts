@@ -1,9 +1,6 @@
-import { Color } from "three";
-
 export default class Image {
   public w: number;
   public h: number;
-  public canvas: HTMLCanvasElement;
   public context: CanvasRenderingContext2D;
   public pixels: Uint8ClampedArray;
   public imageData: ImageData;

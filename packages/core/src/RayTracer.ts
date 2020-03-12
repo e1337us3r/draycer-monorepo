@@ -4,7 +4,6 @@ import {
   Mesh,
   Intersection,
   Vector3,
-  AmbientLight,
   Light,
   PerspectiveCamera
 } from "three";
@@ -21,7 +20,6 @@ export default class RayTracer {
   private readonly w: number;
   private readonly h: number;
   private readonly raycaster: THREE.Raycaster;
-  private readonly ambient: Color;
   private readonly camera: PerspectiveCamera;
   private readonly lights: Light[] = [];
   private imagePlane: any;
@@ -30,12 +28,6 @@ export default class RayTracer {
     this.threeScene = threeScene;
     this.w = w;
     this.h = h;
-
-    // Optimization for ambient light calculations
-    const ambient = threeScene.getObjectByName(
-      Editor.NAME_AMBIENT
-    ) as AmbientLight;
-    this.ambient = ambient.color.clone().multiplyScalar(ambient.intensity);
 
     for (const obj of threeScene.children) {
       if (obj.name === Editor.NAME_LIGHT) {
@@ -69,6 +61,10 @@ export default class RayTracer {
         color.add(sample.clone().multiplyScalar(1 / NUM_SAMPLES_PER_PIXEL));
       }
     }
+
+    color.r = color.r > 1 ? 1 : color.r;
+    color.g = color.g > 1 ? 1 : color.g;
+    color.b = color.b > 1 ? 1 : color.b;
 
     return Utils.imageColorFromColor(color);
   }
@@ -165,9 +161,6 @@ export default class RayTracer {
         .multiplyScalar(Math.pow(amountReflectedAtViewer, material.opacity));
       color.add(specular);
     });
-
-    const ambient = material.color.clone().multiply(this.ambient);
-    color.add(ambient);
 
     color.r = color.r < 0 ? 0 : color.r > 1 ? 1 : color.r;
     color.g = color.g < 0 ? 0 : color.g > 1 ? 1 : color.g;

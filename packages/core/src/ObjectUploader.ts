@@ -1,8 +1,7 @@
-import * as THREE from "three";
 import { OBJLoader2 } from "three/examples/jsm/loaders/OBJLoader2";
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
 import Editor from "./Editor";
-import { MeshPhongMaterial } from "three";
+import { MeshPhongMaterial, Mesh } from "three";
 
 export default class ObjectUploader {
   private editor: Editor;
@@ -19,7 +18,7 @@ export default class ObjectUploader {
       color: 0x00ff00,
       reflectivity: 1
     });
-    (object.children[0] as THREE.Mesh).material = material;
+    (object.children[0] as Mesh).material = material;
     this.editor.addObjectToScene(object.children[0]);
   }
 
