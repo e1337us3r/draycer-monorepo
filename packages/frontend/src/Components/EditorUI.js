@@ -140,6 +140,14 @@ class EditorUI extends React.Component {
     this.EDITOR.uploadObjectToScene(event.target.files);
   };
 
+  uploadTexture = event =>{
+        this.EDITOR.uploadTexture(event.target.files);
+    };
+
+  setDefaultTextureToSelectedObject = () => {
+        this.EDITOR.setTexture();
+    };
+
   downloadRender = event => {
     event.target.href = this.imageCanvas.toDataURL("image/png");
   };
@@ -221,6 +229,18 @@ class EditorUI extends React.Component {
                     wb_incandescent{" "}
                   </i>
                 </div>
+
+
+             <div className="col-md-4">
+                <i
+               id="default-texture"
+                  className="material-icons-outlined item"
+              onClick={this.setDefaultTextureToSelectedObject}
+                  >
+                wb_incandescent{" "}
+                </i>
+      </div>
+          
               </div>
             </div>
             <div className="row col-md-10" style={{ padding: "15px" }}>

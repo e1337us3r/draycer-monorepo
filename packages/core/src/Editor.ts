@@ -18,6 +18,8 @@ import {
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { TransformControls } from "three/examples/jsm/controls/TransformControls";
 import ObjectUploader from "./ObjectUploader";
+import LoadTexture from "./LoadTexture";
+
 
 export default class Editor {
   public static NAME_AMBIENT = "ambient";
@@ -33,12 +35,15 @@ export default class Editor {
   private camera: PerspectiveCamera;
   private helpers: Object3D[] = [];
   private objectLoader: ObjectUploader;
+  private textureLoader: LoadTexture;
+  private selectedObject: Object3D;
   private rayCaster: Raycaster;
 
   public initialize(editorCanvas: HTMLCanvasElement, scene?: Scene): void {
     this.editorCanvas = editorCanvas;
     this.scene = scene ? scene : new Scene();
     this.objectLoader = new ObjectUploader(this);
+    this.textureLoader = new LoadTexture();
     this.rayCaster = new Raycaster();
 
     if (scene) {
@@ -246,6 +251,23 @@ export default class Editor {
     }
   }
 
+  // Public uploadTexture(files: File[]): void {
+  // This.textureLoader.getTextureLoading()
+  // }
+
+  public setTexture(): void {
+    const defaultTex = this.textureLoader.getTextureLoading(
+      "https://images.designtrends.com/wp-content/uploads/2016/09/17145735/Soccer-ball-Texture1.jpg"
+    );
+
+    this.selectedObject.traverse(childObj => {
+      if (!(childObj instanceof Mesh)) {
+        return;
+      }
+      childObj.material = new MeshPhongMaterial({ map: defaultTex });
+    });
+  }
+
   public selectObjects(mouseClickedPosition: Vector2): void {
     this.rayCaster.setFromCamera(mouseClickedPosition, this.camera);
 
@@ -258,6 +280,7 @@ export default class Editor {
     const intersects = this.rayCaster.intersectObjects(objects)[0];
 
     if (intersects !== undefined) {
+      this.selectedObject = intersects.object;
       this.attachTransformController(intersects.object);
     }
   }
