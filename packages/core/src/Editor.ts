@@ -13,13 +13,12 @@ import {
   PCFShadowMap,
   MeshPhongMaterial,
   Mesh,
-  Math as ThreeMath
+  Math as ThreeMath,
+  TextureLoader
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { TransformControls } from "three/examples/jsm/controls/TransformControls";
 import ObjectUploader from "./ObjectUploader";
-import LoadTexture from "./LoadTexture";
-
 
 export default class Editor {
   public static NAME_AMBIENT = "ambient";
@@ -35,7 +34,7 @@ export default class Editor {
   private camera: PerspectiveCamera;
   private helpers: Object3D[] = [];
   private objectLoader: ObjectUploader;
-  private textureLoader: LoadTexture;
+  private textureLoader: TextureLoader;
   private selectedObject: Object3D;
   private rayCaster: Raycaster;
 
@@ -43,7 +42,7 @@ export default class Editor {
     this.editorCanvas = editorCanvas;
     this.scene = scene ? scene : new Scene();
     this.objectLoader = new ObjectUploader(this);
-    this.textureLoader = new LoadTexture();
+    this.textureLoader = new TextureLoader();
     this.rayCaster = new Raycaster();
 
     if (scene) {
@@ -255,8 +254,25 @@ export default class Editor {
   // This.textureLoader.getTextureLoading()
   // }
 
-  public setTexture(): void {
-    const defaultTex = this.textureLoader.getTextureLoading(
+  public setTextureSelected(path: string): void {
+    const texture = this.textureLoader.load(path);
+
+    this.selectedObject.traverse(childObj => {
+      if (!(childObj instanceof Mesh)) {
+        return;
+      }
+      (childObj.material as MeshPhongMaterial).map = texture;
+      (childObj.material as MeshPhongMaterial).needsUpdate = true;
+    });
+  }
+
+  public setTextureDefault(): void {
+    // eslint-disable-next-line eqeqeq
+    if (this.selectedObject == undefined) {
+      return;
+    }
+
+    const defaultTex = this.textureLoader.load(
       "https://images.designtrends.com/wp-content/uploads/2016/09/17145735/Soccer-ball-Texture1.jpg"
     );
 
@@ -264,7 +280,8 @@ export default class Editor {
       if (!(childObj instanceof Mesh)) {
         return;
       }
-      childObj.material = new MeshPhongMaterial({ map: defaultTex });
+      (childObj.material as MeshPhongMaterial).map = defaultTex;
+      (childObj.material as MeshPhongMaterial).needsUpdate = true;
     });
   }
 

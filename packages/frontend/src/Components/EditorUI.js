@@ -140,14 +140,14 @@ class EditorUI extends React.Component {
     this.EDITOR.uploadObjectToScene(event.target.files);
   };
 
-  uploadTexture = event =>{
-        this.EDITOR.uploadTexture(event.target.files);
-    };
-
   setDefaultTextureToSelectedObject = () => {
-        this.EDITOR.setTexture();
+        this.EDITOR.setTextureDefault();
     };
-
+  
+  uploadSelectedTexture = event =>{
+        this.EDITOR.setTextureSelected(URL.createObjectURL(event.target.files[0]));
+    };
+  
   downloadRender = event => {
     event.target.href = this.imageCanvas.toDataURL("image/png");
   };
@@ -239,7 +239,15 @@ class EditorUI extends React.Component {
                   >
                 wb_incandescent{" "}
                 </i>
-      </div>
+            </div>
+
+             <input
+               type="file"
+               name="files[]"
+             id="texture-upload"
+            accept="image/*"
+            onChange={this.uploadSelectedTexture}
+            />
           
               </div>
             </div>
