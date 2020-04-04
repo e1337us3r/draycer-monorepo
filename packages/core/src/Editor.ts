@@ -14,7 +14,8 @@ import {
   MeshPhongMaterial,
   Mesh,
   Math as ThreeMath,
-  TextureLoader
+  TextureLoader,
+    Color
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { TransformControls } from "three/examples/jsm/controls/TransformControls";
@@ -262,6 +263,7 @@ export default class Editor {
         return;
       }
       (childObj.material as MeshPhongMaterial).map = texture;
+      (childObj.material as MeshPhongMaterial).color = new Color(1, 1, 1);
       (childObj.material as MeshPhongMaterial).needsUpdate = true;
     });
   }
@@ -281,6 +283,7 @@ export default class Editor {
         return;
       }
       (childObj.material as MeshPhongMaterial).map = defaultTex;
+      (childObj.material as MeshPhongMaterial).color = new Color(1, 1, 1);
       (childObj.material as MeshPhongMaterial).needsUpdate = true;
     });
   }

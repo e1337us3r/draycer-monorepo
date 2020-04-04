@@ -9,6 +9,7 @@ import {
 } from "three";
 import Editor from "./Editor";
 import { Utils } from "./index";
+import * as Jimp from "jimp";
 
 const MAX_BOUNCES = 3;
 const NUM_SAMPLES_PER_DIRECTION = 2;
@@ -23,6 +24,8 @@ export default class RayTracer {
   private readonly camera: PerspectiveCamera;
   private readonly lights: Light[] = [];
   private imagePlane: any;
+  private textureImage: Jimp;
+  private textures: any = {};
 
   public constructor(threeScene: THREE.Scene, w: number, h: number) {
     this.threeScene = threeScene;
@@ -42,6 +45,12 @@ export default class RayTracer {
     ) as PerspectiveCamera;
 
     this.imagePlane = this.calculateImagePlane();
+  }
+
+  public async loadTextures(): Promise<void> {
+    this.textureImage = await Jimp.read(
+      "https://images.designtrends.com/wp-content/uploads/2016/09/17145735/Soccer-ball-Texture1.jpg"
+    );
   }
 
   public tracedValueAtPixel(
@@ -143,7 +152,22 @@ export default class RayTracer {
         return;
       }
 
-      const diffuse = material.color
+      let diffuse = material.color;
+
+      if (intersection.uv) {
+        const uv = intersection.uv;
+        material.map.transformUv(uv);
+
+        const PixelColor = this.textureImage.getPixelColor(uv.x, uv.y);
+        const PixelColorText = Jimp.intToRGBA(PixelColor);
+        diffuse = new Color(
+          PixelColorText.r,
+          PixelColorText.g,
+          PixelColorText.b
+        );
+      }
+
+      diffuse = diffuse
         .clone()
         .multiply(light.color)
         .multiplyScalar(lightInNormalDirection);

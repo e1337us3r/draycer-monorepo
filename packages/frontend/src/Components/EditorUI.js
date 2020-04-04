@@ -78,6 +78,7 @@ class EditorUI extends React.Component {
         this.WIDTH,
         this.HEIGHT
       );
+      await tracer.loadTextures();
       const image = new Image(this.imageCanvas);
       for (let y = 0; y < this.HEIGHT; y++) {
         for (let x = 0; x < this.WIDTH; x++) {

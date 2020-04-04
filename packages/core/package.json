@@ -30,6 +30,8 @@
     "typescript": "^3.7.2"
   },
   "dependencies": {
+    "jimp": "^0.10.0",
+    "lerna": "^3.17.0",
     "three": "^0.110.0"
   },
   "husky": {
