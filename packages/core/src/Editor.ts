@@ -1,21 +1,28 @@
 import {
   AmbientLight,
+  Color,
+  GridHelper,
   Light,
+  Math as ThreeMath,
+  Mesh,
+  MeshPhongMaterial,
+  Object3D,
+  PCFShadowMap,
   PerspectiveCamera,
   PointLight,
-  WebGLRenderer,
-  Object3D,
-  SphereGeometry,
-  Scene,
-  Vector2,
   Raycaster,
-  GridHelper,
-  PCFShadowMap,
-  MeshPhongMaterial,
-  Mesh,
-  Math as ThreeMath,
+  Scene,
+  SphereGeometry,
   TextureLoader,
-    Color
+  Vector2,
+  WebGLRenderer,
+  LinearFilter,
+  BackSide,
+  BoxBufferGeometry,
+  ShaderMaterial,
+  ShaderLib,
+  MeshBasicMaterial,
+  Renderer
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { TransformControls } from "three/examples/jsm/controls/TransformControls";
@@ -38,6 +45,7 @@ export default class Editor {
   private textureLoader: TextureLoader;
   private selectedObject: Object3D;
   private rayCaster: Raycaster;
+  private skybox: Mesh;
 
   public initialize(editorCanvas: HTMLCanvasElement, scene?: Scene): void {
     this.editorCanvas = editorCanvas;
@@ -66,13 +74,45 @@ export default class Editor {
       this.scene.add(this.camera);
     }
 
-    this.renderer = new WebGLRenderer({
+    // Camera controls does not work without this line
+    this.camera.position.set(-5, 5, 5);
+    this.setUpRenderer();
+    this.addSkybox(
+      "https://cors-anywhere.herokuapp.com/https://wallpaperaccess.com/full/945996.jpg"
+    );
+    this.setUpGridHelper();
+    this.setUpControls();
+  }
+
+  public setUpGridHelper(): void {
+    const gridHelper = new GridHelper(5, 10);
+    gridHelper.material = new MeshBasicMaterial({ color: new Color(0, 0, 0) });
+    this.scene.add(gridHelper);
+    this.helpers.push(gridHelper);
+  }
+
+  public setUpControls(): void {
+    this.orbitControls = new OrbitControls(
+      this.camera,
+      this.renderer.domElement
+    );
+
+    this.orbitControls.update();
+
+    this.transformControls = new TransformControls(
+      this.camera,
+      this.renderer.domElement
+    );
+  }
+
+  public setUpRenderer(): void {
+    const renderer = new WebGLRenderer({
       antialias: true,
       canvas: this.editorCanvas
     });
 
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = PCFShadowMap;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = PCFShadowMap;
 
     const gl = this.editorCanvas.getContext("webgl");
     // Set clear color to black, fully opaque
@@ -84,22 +124,27 @@ export default class Editor {
     // Clear the color as well as the depth buffer.
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    this.orbitControls = new OrbitControls(
-      this.camera,
-      this.renderer.domElement
-    );
-    this.camera.position.set(-5, 0, 0);
+    this.renderer = renderer;
+  }
 
-    const gridHelper = new GridHelper(5, 10);
-    this.scene.add(gridHelper);
-    this.helpers.push(gridHelper);
+  public addSkybox(imgUrl: string): void {
+    const texture = this.textureLoader.load(imgUrl);
+    texture.magFilter = LinearFilter;
+    texture.minFilter = LinearFilter;
 
-    this.orbitControls.update();
-
-    this.transformControls = new TransformControls(
-      this.camera,
-      this.renderer.domElement
-    );
+    const shader = ShaderLib.equirect;
+    const material = new ShaderMaterial({
+      fragmentShader: shader.fragmentShader,
+      vertexShader: shader.vertexShader,
+      uniforms: shader.uniforms,
+      depthWrite: false,
+      side: BackSide
+    });
+    material.uniforms.tEquirect.value = texture;
+    const plane = new BoxBufferGeometry(20, 20, 20);
+    this.skybox = new Mesh(plane, material);
+    this.helpers.push(this.skybox);
+    this.scene.add(this.skybox);
   }
 
   public attachTransformController(object: Object3D): void {
@@ -172,6 +217,8 @@ export default class Editor {
         case 32: // Spacebar
           this.transformControls.enabled = !this.transformControls.enabled;
           break;
+        case 46: // Delete
+          this.scene.remove(this.selectedObject);
       }
     });
   }
@@ -199,6 +246,7 @@ export default class Editor {
   public addObjectToScene(object: Object3D): void {
     this.scene.add(object);
 
+    this.selectedObject = object;
     this.attachTransformController(object);
   }
 
@@ -256,6 +304,9 @@ export default class Editor {
   // }
 
   public setTextureSelected(path: string): void {
+    if (!(this.selectedObject instanceof Mesh)) {
+      return;
+    }
     const texture = this.textureLoader.load(path);
 
     this.selectedObject.traverse(childObj => {
@@ -268,31 +319,11 @@ export default class Editor {
     });
   }
 
-  public setTextureDefault(): void {
-    // eslint-disable-next-line eqeqeq
-    if (this.selectedObject == undefined) {
-      return;
-    }
-
-    const defaultTex = this.textureLoader.load(
-      "https://images.designtrends.com/wp-content/uploads/2016/09/17145735/Soccer-ball-Texture1.jpg"
-    );
-
-    this.selectedObject.traverse(childObj => {
-      if (!(childObj instanceof Mesh)) {
-        return;
-      }
-      (childObj.material as MeshPhongMaterial).map = defaultTex;
-      (childObj.material as MeshPhongMaterial).color = new Color(1, 1, 1);
-      (childObj.material as MeshPhongMaterial).needsUpdate = true;
-    });
-  }
-
   public selectObjects(mouseClickedPosition: Vector2): void {
     this.rayCaster.setFromCamera(mouseClickedPosition, this.camera);
 
     const objects = this.scene.children.filter((value: any) => {
-      if (!(value instanceof GridHelper)) {
+      if (!(value instanceof GridHelper || value === this.skybox)) {
         return value;
       }
     });
