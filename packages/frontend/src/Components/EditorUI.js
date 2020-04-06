@@ -1,305 +1,350 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import history from "./history";
 import firebase from "./auth/firebase";
 import { Editor, RayTracer, Image } from "draycer";
 import {
-  Color,
-  PointLight,
-  MeshPhongMaterial,
-  Mesh,
-  SphereGeometry,
-  BoxGeometry,
-  ConeGeometry,
-    Vector2
+    Color,
+    PointLight,
+    MeshPhongMaterial,
+    Mesh,
+    SphereGeometry,
+    BoxGeometry,
+    ConeGeometry,
+    Vector2,
 } from "three";
 import axios from "axios";
 import CONFIG from "../config";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import Button from "@material-ui/core/Button";
+import { Paper } from "@material-ui/core";
+import CropDinIcon from "@material-ui/icons/CropDin";
+import Brightness1Icon from "@material-ui/icons/Brightness1";
+import ChangeHistoryIcon from "@material-ui/icons/ChangeHistory";
+import Brightness7Icon from "@material-ui/icons/Brightness7";
+import CloudUploadIcon from "@material-ui/icons/CloudUpload";
+import TextureIcon from "@material-ui/icons/Texture";
 
-class EditorUI extends React.Component {
-  constructor() {
-    super();
+const EditorUI = () => {
+    const [showResult, setShowResult] = useState(false);
+    const [object, setObject] = useState({});
+    const [imageCanvas, setImageCanvas] = useState();
+    const [editorCanvas, setEditorCanvas] = useState();
+    const [WIDTH, setWIDTH] = useState();
+    const [HEIGHT, setHEIGHT] = useState();
+    const [EDITOR, setEDITOR] = useState();
 
-    this.state = {
-      showResult: false
-    };
-  }
-  componentDidMount() {
-    //if (!firebase.auth().currentUser) history.push("/login");
+    useEffect(() => {
+        setImageCanvas(document.querySelector("#imageCanvas"));
+        setEditorCanvas(document.querySelector("#editorCanvas"));
+        setEDITOR(new Editor());
+    }, []);
 
-    (async ()=> {
-      this.imageCanvas = document.querySelector("#imageCanvas");
-      this.editorCanvas = document.querySelector("#editorCanvas");
-      this.WIDTH = this.imageCanvas.width;
-      this.HEIGHT = this.imageCanvas.height;
+    useEffect(() => {
+        const setCanvas = async () => {
+            setWIDTH(imageCanvas.width);
+            setHEIGHT(imageCanvas.height);
 
+            const mouse = new Vector2();
+            editorCanvas.addEventListener(
+                "click",
+                (event) => {
+                    const rect = editorCanvas.getBoundingClientRect();
+                    const clientX = event.clientX - rect.left;
+                    const clientY = event.clientY - rect.top;
+                    mouse.x = (clientX / editorCanvas.clientWidth) * 2 - 1;
+                    mouse.y = -(clientY / editorCanvas.clientHeight) * 2 + 1;
+                    EDITOR.selectObjects(mouse);
+                },
+                false
+            );
 
-      const mouse = new Vector2();
-      this.editorCanvas.addEventListener( 'click', (event)=> {
-        const rect = this.editorCanvas.getBoundingClientRect();
-        const clientX = event.clientX - rect.left;
-        const clientY = event.clientY - rect.top;
+            EDITOR.initialize(editorCanvas);
 
-        mouse.x = ( clientX / this.editorCanvas.clientWidth) * 2 - 1;
-        mouse.y = - ( clientY / this.editorCanvas.clientHeight ) * 2 + 1;
-        this.EDITOR.selectObjects(mouse);
-      }, false );
+            const animate = () => {
+                requestAnimationFrame(animate);
+                EDITOR.render();
+            };
 
-      this.EDITOR = new Editor();
-      this.EDITOR.initialize(this.editorCanvas);
-
-      const animate = () => {
-        requestAnimationFrame(animate);
-        this.EDITOR.render();
-      };
-
-      animate();
-    })()
-
-  }
-
-  renderScene = async (option) => {
-
-    const scene = this.EDITOR.getRenderingScene();
-    console.log(scene);
-    const sceneJson = scene.toJSON();
-    sceneJson.WIDTH = this.WIDTH;
-    sceneJson.HEIGHT = this.HEIGHT;
-
-    if (option > 0)
-    await axios.post(CONFIG.serverUrl + "/scene", {scene: sceneJson});
-
-    if (option === 1)
-      history.push("/tasks");
-    else {
-      const tracer = new RayTracer(
-        scene,
-        this.WIDTH,
-        this.HEIGHT
-      );
-      await tracer.loadTextures();
-      const image = new Image(this.imageCanvas);
-      for (let y = 0; y < this.HEIGHT; y++) {
-        for (let x = 0; x < this.WIDTH; x++) {
-          image.putPixel(
-            x,
-            y,
-            tracer.tracedValueAtPixel(x, y)
-          );
+            animate();
+        };
+        if (imageCanvas) {
+            setCanvas();
         }
-        image.renderInto(this.imageCanvas);
-      }
-
-      this.setState({showResult : true})
-    }
-
-  };
-
-  addSphere = () => {
-    const object = new SphereGeometry(1, 20, 20);
-    const material = new MeshPhongMaterial({
-      color: 0x00ff00,
-      reflectivity: 0.2
     });
-    const sphere = new Mesh(object, material);
-    sphere.position.set(0, 0, 0);
-    this.EDITOR.addObjectToScene(sphere);
-  };
 
-  addCube = () => {
-    const object = new BoxGeometry(1, 1, 1);
+    const renderScene = async (option) => {
+        const scene = EDITOR.getRenderingScene();
+        console.log(scene);
+        const sceneJson = scene.toJSON();
+        sceneJson.WIDTH = WIDTH;
+        sceneJson.HEIGHT = HEIGHT;
 
-    const material = new MeshPhongMaterial({
-      color: 0x00ff00,
-      reflectivity: 0.2
-    });
-    const cube = new Mesh(object, material);
-    cube.position.set(0, 0, 0);
-    this.EDITOR.addObjectToScene(cube);
-  };
+        if (option > 0)
+            await axios.post(CONFIG.serverUrl + "/scene", { scene: sceneJson });
 
-  addPyramid = () => {
-    const object = new ConeGeometry(1, 2, 5);
+        if (option === 1) history.push("/tasks");
+        else {
+            const tracer = new RayTracer(scene, WIDTH, HEIGHT);
+            await tracer.loadTextures();
+            const image = new Image(imageCanvas);
+            for (let y = 0; y < HEIGHT; y++) {
+                for (let x = 0; x < WIDTH; x++) {
+                    image.putPixel(x, y, tracer.tracedValueAtPixel(x, y));
+                }
+                image.renderInto(imageCanvas);
+            }
 
-    const material = new MeshPhongMaterial({
-      color: 0x00ff00,
-      reflectivity: 0.2
-    });
-    const pyramid = new Mesh(object, material);
-    pyramid.position.set(0, 0, 0);
-    this.EDITOR.addObjectToScene(pyramid);
-  };
-
-  addLight = () => {
-    const light = new PointLight(new Color(0.5, 0.5, 0.5), 0.8, 100);
-    light.position.set(2, 2, 2);
-    this.EDITOR.addLightToScene(light);
-  };
-
-  uploadSelectedModel = event => {
-    if (event.target.files)
-    this.EDITOR.uploadObjectToScene(event.target.files);
-  };
-
-  uploadSelectedTexture = event =>{
-    if (event.target.files[0])
-        this.EDITOR.setTextureSelected(URL.createObjectURL(event.target.files[0]));
+            setShowResult(true);
+        }
     };
-  
-  downloadRender = event => {
-    event.target.href = this.imageCanvas.toDataURL("image/png");
-  };
-  openUploadDialog = () => {
-    document.querySelector("#item-upload").click();
-  };
 
-  clickUploadSelectedTexture = () => {
-    document.querySelector("#texture-upload").click();
-  }
+    const addSphere = () => {
+        const object = new SphereGeometry(1, 20, 20);
+        const material = new MeshPhongMaterial({
+            color: 0x00ff00,
+            reflectivity: 0.2,
+        });
+        const sphere = new Mesh(object, material);
+        sphere.position.set(0, 0, 0);
+        EDITOR.addObjectToScene(sphere);
+    };
 
-  render() {
+    const addCube = () => {
+        const object = new BoxGeometry(1, 1, 1);
+
+        const material = new MeshPhongMaterial({
+            color: 0x00ff00,
+            reflectivity: 0.2,
+        });
+        const cube = new Mesh(object, material);
+        cube.position.set(0, 0, 0);
+        EDITOR.addObjectToScene(cube);
+    };
+
+    const addPyramid = () => {
+        const object = new ConeGeometry(1, 2, 5);
+
+        const material = new MeshPhongMaterial({
+            color: 0x00ff00,
+            reflectivity: 0.2,
+        });
+        const pyramid = new Mesh(object, material);
+        pyramid.position.set(0, 0, 0);
+        EDITOR.addObjectToScene(pyramid);
+    };
+
+    const addLight = () => {
+        const light = new PointLight(new Color(0.5, 0.5, 0.5), 0.8, 100);
+        light.position.set(2, 2, 2);
+        EDITOR.addLightToScene(light);
+    };
+
+    const uploadSelectedModel = (event) => {
+        if (event.target.files) EDITOR.uploadObjectToScene(event.target.files);
+    };
+
+    const uploadSelectedTexture = (event) => {
+        if (event.target.files[0])
+            EDITOR.setTextureSelected(
+                URL.createObjectURL(event.target.files[0])
+            );
+    };
+
+    const downloadRender = (event) => {
+        event.target.href = imageCanvas.toDataURL("image/png");
+    };
+    const openUploadDialog = () => {
+        document.querySelector("#item-upload").click();
+    };
+
+    const clickUploadSelectedTexture = () => {
+        document.querySelector("#texture-upload").click();
+    };
+
     return (
-      <div>
-        <div id="editor" className="container">
-          <div className="row">
-            <div id="stage" className="col-md-10">
-              <canvas
-                id="editorCanvas"
-                width="900"
-                height="600"
-                hidden={this.state.showResult}
-              />
-              <canvas
-                id="imageCanvas"
-                width="900"
-                height="600"
-                hidden={!this.state.showResult}
-              />
-            </div>
-            <div id="toolbar" className="col-md-2">
-              <div className="row">
-                <div className="col-md-4 ">
-                  <i
-                    className="material-icons-outlined item"
-                    onClick={this.addCube}
-                  >
-                    crop_din{" "}
-                  </i>
+        <div
+            style={{
+                display: "flex",
+                justifyContent: "space-evenly",
+            }}
+        >
+            <Paper
+                style={{
+                    flex: "0 0 20%",
+                    textAlign: "center",
+                    marginTop: "10px",
+                    height: "100%",
+                }}
+            >
+                <h2>Keyboard Shortcuts</h2>
+                <div>
+                    <h4>Object Transform</h4>
+                    <p>'W': Translate</p>
+                    <p>'E' = Rotate</p>
+                    <p>'R' = Scale</p>
+                    <p>'Del' = Delete</p>
                 </div>
-                <div className="col-md-4">
-                  <i
-                    id="item-sphere"
-                    className="material-icons-outlined item"
-                    onClick={this.addSphere}
-                  >
-                    brightness_1
-                  </i>
+                <div>
+                    <h4>Transform Controller</h4>
+                    <p>'+' = Increase Controller Size</p>
+                    <p>'-' = Decrease Controller Size</p>
+                    <p>'Space' = Toggle Controller</p>
+                    <p>'X' = Toggle X Dimension</p>
+                    <p>'Y' = Toggle Y Dimension</p>
+                    <p>'Z' = Toggle Z Dimension</p>
                 </div>
-                <div className="col-md-4">
-                  <i
-                    className="material-icons-outlined item"
-                    onClick={this.addPyramid}
-                  >
-                    change_history{" "}
-                  </i>
-                </div>
-                <div className="col-md-4">
-                  <input
-                    type="file"
-                    name="files[]"
-                    id="item-upload"
-                    accept=".obj"
-                    hidden={true}
-                    onChange={this.uploadSelectedModel}
-                  />
+            </Paper>
+            <div
+                id="editor"
+                style={{
+                    flex: "0 0 60%",
+                    margin: "10px auto",
+                    display: "flex",
+                }}
+            >
+                <div style={{ margin: "0 auto" }}>
+                    <div id="stage">
+                        <canvas
+                            id="editorCanvas"
+                            width="1000"
+                            height="600"
+                            hidden={showResult}
+                        />
+                        <canvas
+                            id="imageCanvas"
+                            width="1000"
+                            height="600"
+                            hidden={!showResult}
+                        />
+                    </div>
 
-                  <i
-                    className="material-icons-outlined item"
-                    id="item-upload-button"
-                    title="Upload obj file"
-                    onClick={this.openUploadDialog}
-                  >
-                    cloud_upload{" "}
-                  </i>
+                    <div style={{ padding: "15px" }}>
+                        <div>
+                            <button
+                                onClick={() => {
+                                    setShowResult(false);
+                                    EDITOR.back();
+                                }}
+                                hidden={!showResult}
+                            >
+                                Back
+                            </button>
+                        </div>
+                        <div>
+                            <a
+                                href="#"
+                                id="btn-download"
+                                download="result.png"
+                                onClick={downloadRender}
+                                hidden={!showResult}
+                            >
+                                Download
+                            </a>
+                        </div>
+                        <div>
+                            <ButtonGroup
+                                variant="contained"
+                                color="primary"
+                                aria-label="contained primary button group"
+                                style={{ maxHeight: "75px" }}
+                            >
+                                <Button
+                                    style={{ marginRight: "10px" }}
+                                    hidden={showResult}
+                                    onClick={() => renderScene(0)}
+                                >
+                                    Client Render
+                                </Button>
+                                <Button
+                                    style={{ marginRight: "10px" }}
+                                    hidden={showResult}
+                                    onClick={() => renderScene(1)}
+                                >
+                                    Server Render
+                                </Button>
+                                <Button
+                                    hidden={showResult}
+                                    onClick={() => renderScene(2)}
+                                >
+                                    Client & Server Render
+                                </Button>
+                            </ButtonGroup>
+                        </div>
+                    </div>
                 </div>
-                <div className="col-md-4">
-                  <i
-                    id="item-light"
-                    className="material-icons-outlined item"
-                    onClick={this.addLight}
-                  >
-                    wb_incandescent{" "}
-                  </i>
-                </div>
-
-             <input
-               type="file"
-               name="files[]"
-               id="texture-upload"
-               hidden={true}
-                accept="image/*"
-                onChange={this.uploadSelectedTexture}
-            />
-
-                <div className="col-md-4">
-                  <i
-                    id="item-texture"
-                    className="material-icons-outlined item"
-                    onClick={this.clickUploadSelectedTexture}
-                  >
-                    texture{" "}
-                  </i>
-                </div>
-          
-              </div>
             </div>
-            <div className="row col-md-10" style={{ padding: "15px" }}>
-              <div className="col-md-4">
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => {
-                    this.setState({showResult: false});
-                    this.EDITOR.back();
-                  }}
-                  hidden={!this.state.showResult}
-                >
-                  Back
-                </button>
-              </div>
-              <div className="col-md-4">
-                <a
-                  href="#"
-                  className="btn btn-info"
-                  id="btn-download"
-                  download="result.png"
-                  onClick={this.downloadRender}
-                  hidden={!this.state.showResult}
-                >
-                  Download
-                </a>
-              </div>
-              <div className="col-md-4">
-                <ButtonGroup variant="contained" color="primary" aria-label="contained primary button group" style={{maxHeight: "75px"}}>
-                  <Button
-                    style={{marginRight: "10px"}}
-                    hidden={this.state.showResult}
-                    onClick={() => this.renderScene(0)}>Client Render</Button>
-                  <Button
-                    style={{marginRight: "10px"}}
-                    hidden={this.state.showResult}
-                    onClick={() => this.renderScene(1)}>Server Render</Button>
-                  <Button
-                    hidden={this.state.showResult}
-                    onClick={() => this.renderScene(2)}>Client & Server Render</Button>
-                </ButtonGroup>
-              </div>
-            </div>
-          </div>
+            <Paper
+                id="toolbar"
+                style={{
+                    flex: "0 0 20%",
+                    margin: "10px auto",
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    textAlign: "center",
+                }}
+            >
+                <div>
+                    <p onClick={addCube}>
+                        <span>Cube: </span>
+                        <CropDinIcon />
+                    </p>
+                    <p onClick={addSphere}>
+                        <span>Sphere: </span>
+                        <Brightness1Icon />
+                    </p>
+                    <p onClick={addPyramid}>
+                        <span>Pyramid: </span>
+                        <ChangeHistoryIcon />
+                    </p>
+                    <p onClick={openUploadDialog}>
+                        <input
+                            type="file"
+                            name="files[]"
+                            id="item-upload"
+                            accept=".obj"
+                            hidden={true}
+                            onChange={uploadSelectedModel}
+                        />
+                        <span>Upload model: </span>
+                        <CloudUploadIcon />
+                    </p>
+                    <p onClick={addLight}>
+                        <span>Add light: </span>
+                        <Brightness7Icon />
+                    </p>
+
+                    <p onClick={clickUploadSelectedTexture}>
+                        <input
+                            type="file"
+                            name="files[]"
+                            id="texture-upload"
+                            hidden={true}
+                            accept="image/*"
+                            onChange={uploadSelectedTexture}
+                        />
+                        <span>Upload texture: </span>
+
+                        <TextureIcon />
+                    </p>
+                </div>
+                <ObjectProperties object={object} />
+            </Paper>
         </div>
-      </div>
     );
-  }
-}
+};
+
+const ObjectProperties = ({ object }) => {
+    const { opacity, color, reflectivity, transparent } = object;
+
+    return (
+        <ul>
+            <li>Opacity: {opacity}</li>
+            <li>Color: {color}</li>
+            <li>Reflectivity: {reflectivity}</li>
+            <li>transparent: {transparent}</li>
+        </ul>
+    );
+};
 
 export default EditorUI;
