@@ -218,7 +218,9 @@ export default class Editor {
           this.transformControls.enabled = !this.transformControls.enabled;
           break;
         case 46: // Delete
+          this.transformControls.detach();
           this.scene.remove(this.selectedObject);
+          break;
       }
     });
   }
