@@ -78,6 +78,7 @@ class EditorUI extends React.Component {
         this.WIDTH,
         this.HEIGHT
       );
+      await tracer.loadTextures();
       const image = new Image(this.imageCanvas);
       for (let y = 0; y < this.HEIGHT; y++) {
         for (let x = 0; x < this.WIDTH; x++) {
@@ -137,14 +138,12 @@ class EditorUI extends React.Component {
   };
 
   uploadSelectedModel = event => {
+    if (event.target.files)
     this.EDITOR.uploadObjectToScene(event.target.files);
   };
 
-  setDefaultTextureToSelectedObject = () => {
-        this.EDITOR.setTextureDefault();
-    };
-  
   uploadSelectedTexture = event =>{
+    if (event.target.files[0])
         this.EDITOR.setTextureSelected(URL.createObjectURL(event.target.files[0]));
     };
   
@@ -154,6 +153,10 @@ class EditorUI extends React.Component {
   openUploadDialog = () => {
     document.querySelector("#item-upload").click();
   };
+
+  clickUploadSelectedTexture = () => {
+    document.querySelector("#texture-upload").click();
+  }
 
   render() {
     return (
@@ -230,24 +233,24 @@ class EditorUI extends React.Component {
                   </i>
                 </div>
 
-
-             <div className="col-md-4">
-                <i
-               id="default-texture"
-                  className="material-icons-outlined item"
-              onClick={this.setDefaultTextureToSelectedObject}
-                  >
-                wb_incandescent{" "}
-                </i>
-            </div>
-
              <input
                type="file"
                name="files[]"
-             id="texture-upload"
-            accept="image/*"
-            onChange={this.uploadSelectedTexture}
+               id="texture-upload"
+               hidden={true}
+                accept="image/*"
+                onChange={this.uploadSelectedTexture}
             />
+
+                <div className="col-md-4">
+                  <i
+                    id="item-texture"
+                    className="material-icons-outlined item"
+                    onClick={this.clickUploadSelectedTexture}
+                  >
+                    texture{" "}
+                  </i>
+                </div>
           
               </div>
             </div>
@@ -277,11 +280,13 @@ class EditorUI extends React.Component {
                 </a>
               </div>
               <div className="col-md-4">
-                <ButtonGroup variant="contained" color="primary" aria-label="contained primary button group">
+                <ButtonGroup variant="contained" color="primary" aria-label="contained primary button group" style={{maxHeight: "75px"}}>
                   <Button
+                    style={{marginRight: "10px"}}
                     hidden={this.state.showResult}
                     onClick={() => this.renderScene(0)}>Client Render</Button>
                   <Button
+                    style={{marginRight: "10px"}}
                     hidden={this.state.showResult}
                     onClick={() => this.renderScene(1)}>Server Render</Button>
                   <Button

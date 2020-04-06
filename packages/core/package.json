@@ -16,7 +16,6 @@
   "devDependencies": {
     "@commitlint/cli": "^8.2.0",
     "@commitlint/config-conventional": "^8.2.0",
-    "@types/three": "^0.103.2",
     "@typescript-eslint/eslint-plugin": "^2.8.0",
     "@typescript-eslint/eslint-plugin-tslint": "^2.8.0",
     "@typescript-eslint/parser": "^2.8.0",
@@ -30,6 +29,8 @@
     "typescript": "^3.7.2"
   },
   "dependencies": {
+    "jimp": "^0.10.0",
+    "lerna": "^3.17.0",
     "three": "^0.110.0"
   },
   "husky": {

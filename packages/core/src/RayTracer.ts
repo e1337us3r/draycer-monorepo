@@ -5,10 +5,12 @@ import {
   Intersection,
   Vector3,
   Light,
-  PerspectiveCamera
+  PerspectiveCamera,
+  MeshPhongMaterial
 } from "three";
 import Editor from "./Editor";
 import { Utils } from "./index";
+import * as Jimp from "jimp";
 
 const MAX_BOUNCES = 3;
 const NUM_SAMPLES_PER_DIRECTION = 2;
@@ -23,6 +25,7 @@ export default class RayTracer {
   private readonly camera: PerspectiveCamera;
   private readonly lights: Light[] = [];
   private imagePlane: any;
+  private textures: any = {};
 
   public constructor(threeScene: THREE.Scene, w: number, h: number) {
     this.threeScene = threeScene;
@@ -30,6 +33,13 @@ export default class RayTracer {
     this.h = h;
 
     for (const obj of threeScene.children) {
+      if (
+        obj instanceof Mesh &&
+        obj.material instanceof MeshPhongMaterial &&
+        obj.material.map
+      ) {
+        this.textures[obj.uuid] = obj.material.map.image.src;
+      }
       if (obj.name === Editor.NAME_LIGHT) {
         this.lights.push(obj as Light);
       }
@@ -42,6 +52,14 @@ export default class RayTracer {
     ) as PerspectiveCamera;
 
     this.imagePlane = this.calculateImagePlane();
+  }
+
+  public async loadTextures(): Promise<void> {
+    const textKeys = Object.keys(this.textures);
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
+    for (let i = 0; i < textKeys.length; i++) {
+      this.textures[textKeys[i]] = await Jimp.read(this.textures[textKeys[i]]);
+    }
   }
 
   public tracedValueAtPixel(
@@ -125,12 +143,12 @@ export default class RayTracer {
     const normal = this.getNormalFromIntersection(intersection);
 
     this.lights.forEach(light => {
-      const l = light.position
+      const lightSource = light.position
         .clone()
         .sub(intersection.point)
         .normalize();
 
-      const lightInNormalDirection = normal.dot(l);
+      const lightInNormalDirection = normal.dot(lightSource);
       if (lightInNormalDirection < 0) {
         return;
       }
@@ -143,7 +161,26 @@ export default class RayTracer {
         return;
       }
 
-      const diffuse = material.color
+      let diffuse = material.color;
+
+      if (material.map) {
+        const texture = this.textures[intersection.object.uuid];
+
+        const uv = intersection.uv;
+        material.map.transformUv(uv);
+        uv.setX(Math.round(texture.getWidth() * uv.x));
+        uv.setY(Math.round(texture.getHeight() * uv.y));
+
+        const PixelColor = texture.getPixelColor(uv.x, uv.y);
+        const PixelColorText = Jimp.intToRGBA(PixelColor);
+        diffuse = new Color(
+          PixelColorText.r / 256,
+          PixelColorText.g / 256,
+          PixelColorText.b / 256
+        );
+      }
+
+      diffuse = diffuse
         .clone()
         .multiply(light.color)
         .multiplyScalar(lightInNormalDirection);
@@ -153,7 +190,7 @@ export default class RayTracer {
         .clone()
         .multiplyScalar(2)
         .multiplyScalar(lightInNormalDirection)
-        .sub(l);
+        .sub(lightSource);
 
       const amountReflectedAtViewer = v.dot(r);
       const specular = material.specular
