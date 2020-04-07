@@ -176,6 +176,7 @@ const EditorUI = () => {
             style={{
                 display: "flex",
                 justifyContent: "space-evenly",
+                padding: "15px",
             }}
         >
             <Paper
@@ -295,68 +296,118 @@ const EditorUI = () => {
                 }}
             >
                 <div>
-                    <p onClick={addCube}>
-                        <span>Cube: </span>
-                        <CropDinIcon />
+                    <p>
+                        <b>Materials;</b>
                     </p>
-                    <p onClick={addSphere}>
-                        <span>Sphere: </span>
-                        <Brightness1Icon />
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "space-evenly",
+                        }}
+                    >
+                        <p onClick={addCube}>
+                            <span>Cube: </span>
+                            <CropDinIcon />
+                        </p>
+                        <p onClick={addSphere}>
+                            <span>Sphere: </span>
+                            <Brightness1Icon />
+                        </p>
+                        <p onClick={addPyramid}>
+                            <span>Pyramid: </span>
+                            <ChangeHistoryIcon />
+                        </p>
+                        <p onClick={addLight}>
+                            <span>Add light: </span>
+                            <Brightness7Icon />
+                        </p>
+                    </div>
+                    <p>
+                        <b>Model / Texture</b>
                     </p>
-                    <p onClick={addPyramid}>
-                        <span>Pyramid: </span>
-                        <ChangeHistoryIcon />
-                    </p>
-                    <p onClick={openUploadDialog}>
-                        <input
-                            type="file"
-                            name="files[]"
-                            id="item-upload"
-                            accept=".obj"
-                            hidden={true}
-                            onChange={uploadSelectedModel}
-                        />
-                        <span>Upload model: </span>
-                        <CloudUploadIcon />
-                    </p>
-                    <p onClick={addLight}>
-                        <span>Add light: </span>
-                        <Brightness7Icon />
-                    </p>
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "space-evenly",
+                        }}
+                    >
+                        <p onClick={openUploadDialog}>
+                            <input
+                                type="file"
+                                name="files[]"
+                                id="item-upload"
+                                accept=".obj"
+                                hidden={true}
+                                onChange={uploadSelectedModel}
+                            />
+                            <span>Upload model: </span>
+                            <CloudUploadIcon />
+                        </p>
 
-                    <p onClick={clickUploadSelectedTexture}>
-                        <input
-                            type="file"
-                            name="files[]"
-                            id="texture-upload"
-                            hidden={true}
-                            accept="image/*"
-                            onChange={uploadSelectedTexture}
-                        />
-                        <span>Upload texture: </span>
+                        <p onClick={clickUploadSelectedTexture}>
+                            <input
+                                type="file"
+                                name="files[]"
+                                id="texture-upload"
+                                hidden={true}
+                                accept="image/*"
+                                onChange={uploadSelectedTexture}
+                            />
+                            <span>Upload texture: </span>
 
-                        <TextureIcon />
-                    </p>
+                            <TextureIcon />
+                        </p>
+                    </div>
+                    {selectedObject && (
+                        <ObjectProperties object={selectedObject} />
+                    )}
                 </div>
-                {selectedObject && <ObjectProperties object={selectedObject} />}
             </Paper>
         </div>
     );
 };
 
 const ObjectProperties = ({ object = {} }) => {
-    const { opacity, color, reflectivity, transparent, uuid } = object;
-    const properties = { opacity, color, reflectivity, transparent, uuid };
+    const { map, color, reflectivity, refractivity, specular } = object;
+    const properties = { map, color, reflectivity, refractivity, specular };
     return (
         <React.Fragment>
             <h3>Object Details;</h3>
-            <ul>
-                {Object.keys(properties).map((key) => {
-                    return <li key={key}>{`${key}: ${properties[key]}`}</li>;
-                })}
-            </ul>
+            <div style={{ display: "flex", justifyContent: "space-evenly" }}>
+                <ul style={{ listStyleType: "none" }}>
+                    {Object.keys(properties).map((key) => {
+                        return (
+                            <li
+                                key={key}
+                            >{formatProperties`${key}: ${properties[key]}`}</li>
+                        );
+                    })}
+                </ul>
+            </div>
         </React.Fragment>
     );
+};
+
+const formatProperties = (strings, ...values) => {
+    const outp = strings.map((str, ind) => {
+        if (ind > 0) {
+            if (
+                typeof values[ind - 1] === "object" &&
+                values[ind - 1] !== null
+            ) {
+                return Object.keys(values[ind - 1]).map(
+                    (key) =>
+                        key +
+                        ": " +
+                        Number(values[ind - 1][key]).toFixed(2) +
+                        ", "
+                );
+            }
+            return String(values[ind - 1]) + " ";
+        }
+        return str;
+    });
+    return outp;
 };
 
 export default EditorUI;
