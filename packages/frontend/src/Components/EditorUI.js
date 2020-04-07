@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import history from "./history";
 import firebase from "./auth/firebase";
 import { Editor, RayTracer, Image } from "draycer";
@@ -26,12 +26,13 @@ import TextureIcon from "@material-ui/icons/Texture";
 
 const EditorUI = () => {
     const [showResult, setShowResult] = useState(false);
-    const [object, setObject] = useState({});
+    const [selectedObject, setSelectedObject] = useState(null);
     const [imageCanvas, setImageCanvas] = useState();
     const [editorCanvas, setEditorCanvas] = useState();
     const [WIDTH, setWIDTH] = useState();
     const [HEIGHT, setHEIGHT] = useState();
-    const [EDITOR, setEDITOR] = useState();
+    const [EDITOR, setEDITOR] = useState({});
+    const editorRendered = useRef(false);
 
     useEffect(() => {
         setImageCanvas(document.querySelector("#imageCanvas"));
@@ -54,6 +55,10 @@ const EditorUI = () => {
                     mouse.x = (clientX / editorCanvas.clientWidth) * 2 - 1;
                     mouse.y = -(clientY / editorCanvas.clientHeight) * 2 + 1;
                     EDITOR.selectObjects(mouse);
+                    if (editorRendered.current && EDITOR?.selectedObject) {
+                        setSelectedObject(EDITOR.selectedObject.material);
+                        console.log(EDITOR.selectedObject.material);
+                    }
                 },
                 false
             );
@@ -69,8 +74,9 @@ const EditorUI = () => {
         };
         if (imageCanvas) {
             setCanvas();
+            editorRendered.current = true;
         }
-    });
+    }, [EDITOR, editorCanvas, imageCanvas]);
 
     const renderScene = async (option) => {
         const scene = EDITOR.getRenderingScene();
@@ -104,6 +110,7 @@ const EditorUI = () => {
             color: 0x00ff00,
             reflectivity: 0.2,
         });
+        setSelectedObject(material);
         const sphere = new Mesh(object, material);
         sphere.position.set(0, 0, 0);
         EDITOR.addObjectToScene(sphere);
@@ -116,6 +123,8 @@ const EditorUI = () => {
             color: 0x00ff00,
             reflectivity: 0.2,
         });
+        setSelectedObject(material);
+        console.log(material);
         const cube = new Mesh(object, material);
         cube.position.set(0, 0, 0);
         EDITOR.addObjectToScene(cube);
@@ -128,6 +137,7 @@ const EditorUI = () => {
             color: 0x00ff00,
             reflectivity: 0.2,
         });
+        setSelectedObject(material);
         const pyramid = new Mesh(object, material);
         pyramid.position.set(0, 0, 0);
         EDITOR.addObjectToScene(pyramid);
@@ -328,22 +338,24 @@ const EditorUI = () => {
                         <TextureIcon />
                     </p>
                 </div>
-                <ObjectProperties object={object} />
+                {selectedObject && <ObjectProperties object={selectedObject} />}
             </Paper>
         </div>
     );
 };
 
-const ObjectProperties = ({ object }) => {
-    const { opacity, color, reflectivity, transparent } = object;
-
+const ObjectProperties = ({ object = {} }) => {
+    const { opacity, color, reflectivity, transparent, uuid } = object;
+    const properties = { opacity, color, reflectivity, transparent, uuid };
     return (
-        <ul>
-            <li>Opacity: {opacity}</li>
-            <li>Color: {color}</li>
-            <li>Reflectivity: {reflectivity}</li>
-            <li>transparent: {transparent}</li>
-        </ul>
+        <React.Fragment>
+            <h3>Object Details;</h3>
+            <ul>
+                {Object.keys(properties).map((key) => {
+                    return <li key={key}>{`${key}: ${properties[key]}`}</li>;
+                })}
+            </ul>
+        </React.Fragment>
     );
 };
 
