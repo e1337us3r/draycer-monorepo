@@ -171,6 +171,10 @@ const EditorUI = () => {
         document.querySelector("#texture-upload").click();
     };
 
+    const clickUploadLoadScene = () => {
+        document.querySelector("#load-scene").click();
+    };
+
     return (
         <div
             style={{
@@ -231,7 +235,9 @@ const EditorUI = () => {
 
                     <div style={{ padding: "15px" }}>
                         <div>
-                            <button
+                            <Button
+                                variant="contained"
+                                color="secondary"
                                 onClick={() => {
                                     setShowResult(false);
                                     EDITOR.back();
@@ -239,7 +245,7 @@ const EditorUI = () => {
                                 hidden={!showResult}
                             >
                                 Back
-                            </button>
+                            </Button>
                         </div>
                         <div>
                             <a
@@ -284,85 +290,123 @@ const EditorUI = () => {
                     </div>
                 </div>
             </div>
-            <Paper
-                id="toolbar"
-                style={{
-                    flex: "0 0 20%",
-                    margin: "10px auto",
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    textAlign: "center",
-                }}
-            >
-                <div>
-                    <p>
-                        <b>Materials;</b>
-                    </p>
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "space-evenly",
-                        }}
-                    >
-                        <p onClick={addCube}>
-                            <span>Cube: </span>
-                            <CropDinIcon />
+            <div style={{ display: "flex", flexDirection: "column" }}>
+                <Paper
+                    id="toolbar"
+                    style={{
+                        flex: "0 0 20%",
+                        margin: "10px auto",
+                        height: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                        textAlign: "center",
+                    }}
+                >
+                    <div>
+                        <p>
+                            <b>Primitive Objects;</b>
                         </p>
-                        <p onClick={addSphere}>
-                            <span>Sphere: </span>
-                            <Brightness1Icon />
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "space-evenly",
+                            }}
+                        >
+                            <p onClick={addCube}>
+                                <span>Cube: </span>
+                                <CropDinIcon />
+                            </p>
+                            <p onClick={addSphere}>
+                                <span>Sphere: </span>
+                                <Brightness1Icon />
+                            </p>
+                            <p onClick={addPyramid}>
+                                <span>Pyramid: </span>
+                                <ChangeHistoryIcon />
+                            </p>
+                        </div>
+                        <p>
+                            <b>Light Sources</b>
                         </p>
-                        <p onClick={addPyramid}>
-                            <span>Pyramid: </span>
-                            <ChangeHistoryIcon />
+                        <div>
+                            <p onClick={addLight}>
+                                <span>Add light: </span>
+                                <Brightness7Icon />
+                            </p>
+                        </div>
+                        <p>
+                            <b>Scene</b>
                         </p>
-                        <p onClick={addLight}>
-                            <span>Add light: </span>
-                            <Brightness7Icon />
+                        <div>
+                            <ButtonGroup variant="outlined" color="secondary">
+                                <Button>Save Scene</Button>
+                                <Button onClick={clickUploadLoadScene}>
+                                    Load Scene
+                                    <input
+                                        type="file"
+                                        name="files[]"
+                                        id="load-scene"
+                                        accept=".json"
+                                        hidden={true}
+                                    />
+                                </Button>
+                            </ButtonGroup>
+                        </div>
+                        <br />
+                        <p>
+                            <b>Model / Texture</b>
                         </p>
-                    </div>
-                    <p>
-                        <b>Model / Texture</b>
-                    </p>
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "space-evenly",
-                        }}
-                    >
-                        <p onClick={openUploadDialog}>
-                            <input
-                                type="file"
-                                name="files[]"
-                                id="item-upload"
-                                accept=".obj"
-                                hidden={true}
-                                onChange={uploadSelectedModel}
-                            />
-                            <span>Upload model: </span>
-                            <CloudUploadIcon />
-                        </p>
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "column wrap",
+                                justifyContent: "space-evenly",
+                            }}
+                        >
+                            <ButtonGroup>
+                                <Button
+                                    variant="outlined"
+                                    color="secondary"
+                                    onClick={openUploadDialog}
+                                >
+                                    <input
+                                        type="file"
+                                        name="files[]"
+                                        id="item-upload"
+                                        accept=".obj"
+                                        hidden={true}
+                                        onChange={uploadSelectedModel}
+                                    />
+                                    <span>Upload model: </span>
+                                    <CloudUploadIcon />
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    color="secondary"
+                                    onClick={clickUploadSelectedTexture}
+                                >
+                                    <input
+                                        type="file"
+                                        name="files[]"
+                                        id="texture-upload"
+                                        hidden={true}
+                                        accept="image/*"
+                                        onChange={uploadSelectedTexture}
+                                    />
+                                    <span>Upload texture: </span>
 
-                        <p onClick={clickUploadSelectedTexture}>
-                            <input
-                                type="file"
-                                name="files[]"
-                                id="texture-upload"
-                                hidden={true}
-                                accept="image/*"
-                                onChange={uploadSelectedTexture}
-                            />
-                            <span>Upload texture: </span>
-
-                            <TextureIcon />
-                        </p>
+                                    <TextureIcon />
+                                </Button>
+                            </ButtonGroup>
+                        </div>
                     </div>
+                </Paper>
+                <Paper>
                     {selectedObject && (
                         <ObjectProperties object={selectedObject} />
                     )}
-                </div>
-            </Paper>
+                </Paper>
+            </div>
         </div>
     );
 };
@@ -371,7 +415,14 @@ const ObjectProperties = ({ object = {} }) => {
     const { map, color, reflectivity, refractivity, specular } = object;
     const properties = { map, color, reflectivity, refractivity, specular };
     return (
-        <React.Fragment>
+        <div
+            style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                textAlign: "center",
+            }}
+        >
             <h3>Object Details;</h3>
             <div style={{ display: "flex", justifyContent: "space-evenly" }}>
                 <ul style={{ listStyleType: "none" }}>
@@ -384,7 +435,7 @@ const ObjectProperties = ({ object = {} }) => {
                     })}
                 </ul>
             </div>
-        </React.Fragment>
+        </div>
     );
 };
 
