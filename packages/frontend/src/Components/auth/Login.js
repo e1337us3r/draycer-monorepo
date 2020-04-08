@@ -16,12 +16,12 @@ const Login = () => {
     const [emailErrorHelper, setEmailErrorHelper] = useState("");
     const [passErrorHelper, setPassErrorHelper] = useState("");
 
-    const handleSubmit = async e => {
+    const handleSubmit = async (e) => {
         if (email !== "" && password !== "") {
             await firebase
                 .auth()
                 .signInWithEmailAndPassword(email, password)
-                .then(u => console.log(u));
+                .then((u) => console.log(u));
 
             if (firebase.auth().currentUser) {
                 history.push("/landing");
@@ -39,33 +39,33 @@ const Login = () => {
     };
 
     return (
-        <div>
-            <Card className="card">
+        <div style={{ width: "250px", margin: "10% auto" }}>
+            <Card>
                 <form onSubmit={handleSubmit}>
-                    <CardContent className="cardContent">
+                    <CardContent>
+                        <h5>Welcome to DRaycer!</h5>
+
                         <TextField
-                            id="email"
                             label="Email"
                             type="email"
                             autoComplete="email"
                             margin="normal"
                             variant="outlined"
                             value={email}
-                            onChange={e => setMail(e.target.value)}
+                            onChange={(e) => setMail(e.target.value)}
                             error={emailError}
                             helperText={emailErrorHelper}
                         />
 
                         <br />
                         <TextField
-                            id="password"
                             label="Password"
                             type="password"
                             autoComplete="current-password"
                             margin="normal"
                             variant="outlined"
                             value={password}
-                            onChange={e => setPassword(e.target.value)}
+                            onChange={(e) => setPassword(e.target.value)}
                             error={passwordError}
                             helperText={passErrorHelper}
                         />
