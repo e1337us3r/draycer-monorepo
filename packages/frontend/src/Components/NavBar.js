@@ -7,18 +7,18 @@ import {
     Toolbar,
     IconButton,
     Typography,
-    Button
+    Button,
 } from "@material-ui/core";
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     root: {
-        flexGrow: 1
+        flexGrow: 1,
     },
     menuButton: {
-        marginRight: theme.spacing(2)
+        marginRight: theme.spacing(2),
     },
     title: {
-        flexGrow: 1
-    }
+        flexGrow: 1,
+    },
 }));
 export default function NavBar() {
     const [isLogged, setIsLogged] = useState(false);
@@ -37,10 +37,10 @@ export default function NavBar() {
                     ></IconButton>
                     <Typography variant="h6" className={classes.title}>
                         <Link
-                            to="/landing"
+                            to="/"
                             style={{
                                 color: "white",
-                                textDecoration: "none"
+                                textDecoration: "none",
                             }}
                         >
                             DRaycer
@@ -59,7 +59,7 @@ export default function NavBar() {
                             to="/login"
                             style={{
                                 color: "white",
-                                textDecoration: "none"
+                                textDecoration: "none",
                             }}
                         >
                             Login
