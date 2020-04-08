@@ -217,23 +217,33 @@ const EditorUI = () => {
                     display: "flex",
                 }}
             >
-                <div style={{ margin: "0 auto" }}>
+                <div
+                    style={{
+                        margin: "0 auto",
+                        display: "flex",
+                        flexDirection: "column",
+                    }}
+                >
                     <div id="stage">
                         <canvas
                             id="editorCanvas"
-                            width="1000"
+                            width="800"
                             height="600"
                             hidden={showResult}
                         />
                         <canvas
                             id="imageCanvas"
-                            width="1000"
+                            width="800"
                             height="600"
                             hidden={!showResult}
                         />
                     </div>
 
-                    <div style={{ padding: "15px" }}>
+                    <div
+                        style={{
+                            padding: "15px",
+                        }}
+                    >
                         <div>
                             <Button
                                 variant="contained"
@@ -261,7 +271,7 @@ const EditorUI = () => {
                         <div>
                             <ButtonGroup
                                 variant="contained"
-                                color="primary"
+                                color="secondary"
                                 aria-label="contained primary button group"
                                 style={{ maxHeight: "75px" }}
                             >
