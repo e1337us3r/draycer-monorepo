@@ -6,14 +6,16 @@ import {
   Vector3,
   Light,
   PerspectiveCamera,
-  MeshPhongMaterial
+  MeshPhongMaterial,
+  PointLight,
+  DirectionalLight
 } from "three";
 import Editor from "./Editor";
 import { Utils } from "./index";
 import * as Jimp from "jimp";
 
 const MAX_BOUNCES = 3;
-const NUM_SAMPLES_PER_DIRECTION = 2;
+const NUM_SAMPLES_PER_DIRECTION = 4;
 const NUM_SAMPLES_PER_PIXEL =
   NUM_SAMPLES_PER_DIRECTION * NUM_SAMPLES_PER_DIRECTION;
 
@@ -143,10 +145,16 @@ export default class RayTracer {
     const normal = this.getNormalFromIntersection(intersection);
 
     this.lights.forEach(light => {
-      const lightSource = light.position
-        .clone()
-        .sub(intersection.point)
-        .normalize();
+      let lightSource: Vector3;
+
+      if (light instanceof PointLight) {
+        lightSource = light.position
+          .clone()
+          .sub(intersection.point)
+          .normalize();
+      } else if (light instanceof DirectionalLight) {
+        lightSource = light.getWorldDirection(new Vector3());
+      }
 
       const lightInNormalDirection = normal.dot(lightSource);
       if (lightInNormalDirection < 0) {
@@ -174,9 +182,9 @@ export default class RayTracer {
         const PixelColor = texture.getPixelColor(uv.x, uv.y);
         const PixelColorText = Jimp.intToRGBA(PixelColor);
         diffuse = new Color(
-          PixelColorText.r / 256,
-          PixelColorText.g / 256,
-          PixelColorText.b / 256
+          PixelColorText.r / 255,
+          PixelColorText.g / 255,
+          PixelColorText.b / 255
         );
       }
 
