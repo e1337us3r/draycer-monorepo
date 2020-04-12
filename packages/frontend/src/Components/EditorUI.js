@@ -10,7 +10,7 @@ import {
     SphereGeometry,
     BoxGeometry,
     ConeGeometry,
-    Vector2,
+    Vector2
 } from "three";
 import axios from "axios";
 import CONFIG from "../config";
@@ -48,7 +48,7 @@ const EditorUI = () => {
             const mouse = new Vector2();
             editorCanvas.addEventListener(
                 "click",
-                (event) => {
+                event => {
                     const rect = editorCanvas.getBoundingClientRect();
                     const clientX = event.clientX - rect.left;
                     const clientY = event.clientY - rect.top;
@@ -78,7 +78,7 @@ const EditorUI = () => {
         }
     }, [EDITOR, editorCanvas, imageCanvas]);
 
-    const renderScene = async (option) => {
+    const renderScene = async option => {
         const scene = EDITOR.getRenderingScene();
         console.log(scene);
         const sceneJson = scene.toJSON();
@@ -108,7 +108,7 @@ const EditorUI = () => {
         const object = new SphereGeometry(1, 20, 20);
         const material = new MeshPhongMaterial({
             color: 0x00ff00,
-            reflectivity: 0.2,
+            reflectivity: 0.2
         });
         setSelectedObject(material);
         const sphere = new Mesh(object, material);
@@ -121,7 +121,7 @@ const EditorUI = () => {
 
         const material = new MeshPhongMaterial({
             color: 0x00ff00,
-            reflectivity: 0.2,
+            reflectivity: 0.2
         });
         setSelectedObject(material);
         console.log(material);
@@ -135,7 +135,7 @@ const EditorUI = () => {
 
         const material = new MeshPhongMaterial({
             color: 0x00ff00,
-            reflectivity: 0.2,
+            reflectivity: 0.2
         });
         setSelectedObject(material);
         const pyramid = new Mesh(object, material);
@@ -149,18 +149,18 @@ const EditorUI = () => {
         EDITOR.addLightToScene(light);
     };
 
-    const uploadSelectedModel = (event) => {
+    const uploadSelectedModel = event => {
         if (event.target.files) EDITOR.uploadObjectToScene(event.target.files);
     };
 
-    const uploadSelectedTexture = (event) => {
+    const uploadSelectedTexture = event => {
         if (event.target.files[0])
             EDITOR.setTextureSelected(
                 URL.createObjectURL(event.target.files[0])
             );
     };
 
-    const downloadRender = (event) => {
+    const downloadRender = event => {
         event.target.href = imageCanvas.toDataURL("image/png");
     };
     const openUploadDialog = () => {
@@ -180,7 +180,7 @@ const EditorUI = () => {
             style={{
                 display: "flex",
                 justifyContent: "space-evenly",
-                padding: "15px",
+                padding: "15px"
             }}
         >
             <Paper
@@ -215,14 +215,14 @@ const EditorUI = () => {
                 style={{
                     flex: "0 0 60%",
                     margin: "10px auto",
-                    display: "flex",
+                    display: "flex"
                 }}
             >
                 <div
                     style={{
                         margin: "0 auto",
                         display: "flex",
-                        flexDirection: "column",
+                        flexDirection: "column"
                     }}
                 >
                     <div id="stage">
@@ -242,7 +242,7 @@ const EditorUI = () => {
 
                     <div
                         style={{
-                            padding: "15px",
+                            padding: "15px"
                         }}
                     >
                         <div>
@@ -310,7 +310,7 @@ const EditorUI = () => {
                         height: "100%",
                         display: "flex",
                         flexDirection: "column",
-                        textAlign: "center",
+                        textAlign: "center"
                     }}
                 >
                     <div>
@@ -320,7 +320,7 @@ const EditorUI = () => {
                         <ButtonGroup
                             style={{
                                 display: "flex",
-                                justifyContent: "space-evenly",
+                                justifyContent: "space-evenly"
                             }}
                         >
                             <Button onClick={addCube}>
@@ -377,7 +377,7 @@ const EditorUI = () => {
                             style={{
                                 display: "flex",
                                 flexDirection: "column wrap",
-                                justifyContent: "space-evenly",
+                                justifyContent: "space-evenly"
                             }}
                         >
                             <ButtonGroup>
@@ -437,13 +437,13 @@ const ObjectProperties = ({ object = {} }) => {
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
-                textAlign: "center",
+                textAlign: "center"
             }}
         >
             <h3>Object Details;</h3>
             <div style={{ display: "flex", justifyContent: "space-evenly" }}>
                 <ul style={{ listStyleType: "none" }}>
-                    {Object.keys(properties).map((key) => {
+                    {Object.keys(properties).map(key => {
                         return (
                             <li
                                 key={key}
@@ -464,7 +464,7 @@ const formatProperties = (strings, ...values) => {
                 values[ind - 1] !== null
             ) {
                 return Object.keys(values[ind - 1]).map(
-                    (key) =>
+                    key =>
                         key +
                         ": " +
                         Number(values[ind - 1][key]).toFixed(2) +
