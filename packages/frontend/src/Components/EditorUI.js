@@ -188,7 +188,8 @@ const EditorUI = () => {
                     flex: "0 0 20%",
                     textAlign: "center",
                     marginTop: "10px",
-                    height: "100%",
+                    padding: "5px",
+                    height: "100%"
                 }}
             >
                 <h2>Keyboard Shortcuts</h2>
@@ -302,10 +303,10 @@ const EditorUI = () => {
             </div>
             <div style={{ display: "flex", flexDirection: "column" }}>
                 <Paper
-                    id="toolbar"
                     style={{
                         flex: "0 0 20%",
                         margin: "10px auto",
+                        padding: "5px",
                         height: "100%",
                         display: "flex",
                         flexDirection: "column",
@@ -349,6 +350,7 @@ const EditorUI = () => {
                                 <Brightness7Icon />
                             </Button>
                         </div>
+                        <br />
                         <p>
                             <b>Scene</b>
                         </p>
