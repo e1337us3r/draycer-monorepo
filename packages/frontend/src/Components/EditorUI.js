@@ -316,33 +316,38 @@ const EditorUI = () => {
                         <p>
                             <b>Primitive Objects;</b>
                         </p>
-                        <div
+                        <ButtonGroup
                             style={{
                                 display: "flex",
                                 justifyContent: "space-evenly",
                             }}
                         >
-                            <p onClick={addCube}>
+                            <Button onClick={addCube}>
                                 <span>Cube: </span>
                                 <CropDinIcon />
-                            </p>
-                            <p onClick={addSphere}>
+                            </Button>
+                            <Button onClick={addSphere}>
                                 <span>Sphere: </span>
                                 <Brightness1Icon />
-                            </p>
-                            <p onClick={addPyramid}>
+                            </Button>
+                            <Button onClick={addPyramid}>
                                 <span>Pyramid: </span>
                                 <ChangeHistoryIcon />
-                            </p>
-                        </div>
+                            </Button>
+                        </ButtonGroup>
+                        <br />
                         <p>
                             <b>Light Sources</b>
                         </p>
                         <div>
-                            <p onClick={addLight}>
+                            <Button
+                                variant="outlined"
+                                color="primary"
+                                onClick={addLight}
+                            >
                                 <span>Add light: </span>
                                 <Brightness7Icon />
-                            </p>
+                            </Button>
                         </div>
                         <p>
                             <b>Scene</b>
