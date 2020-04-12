@@ -9,7 +9,6 @@ import {
   Object3D,
   PCFShadowMap,
   PerspectiveCamera,
-  PointLight,
   Raycaster,
   Scene,
   SphereGeometry,
@@ -22,7 +21,10 @@ import {
   ShaderMaterial,
   ShaderLib,
   MeshBasicMaterial,
-  Renderer
+  DirectionalLight,
+  ConeGeometry,
+  DirectionalLightHelper,
+  Vector3
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { TransformControls } from "three/examples/jsm/controls/TransformControls";
@@ -84,14 +86,14 @@ export default class Editor {
     this.setUpControls();
   }
 
-  public setUpGridHelper(): void {
+  private setUpGridHelper(): void {
     const gridHelper = new GridHelper(5, 10);
     gridHelper.material = new MeshBasicMaterial({ color: new Color(0, 0, 0) });
     this.scene.add(gridHelper);
     this.helpers.push(gridHelper);
   }
 
-  public setUpControls(): void {
+  private setUpControls(): void {
     this.orbitControls = new OrbitControls(
       this.camera,
       this.renderer.domElement
@@ -105,7 +107,7 @@ export default class Editor {
     );
   }
 
-  public setUpRenderer(): void {
+  private setUpRenderer(): void {
     const renderer = new WebGLRenderer({
       antialias: true,
       canvas: this.editorCanvas
@@ -163,11 +165,16 @@ export default class Editor {
 
       if (object.name === Editor.NAME_LIGHT_HELPER) {
         // @ts-ignore
-        object.light.position.set(
+        const light = object.light;
+        light.position.set(
           object.position.x,
           object.position.y,
           object.position.z
         );
+
+        if (light instanceof DirectionalLight) {
+          console.log(light.getWorldDirection(new Vector3()));
+        }
       }
     });
 
@@ -253,11 +260,22 @@ export default class Editor {
   }
 
   public addLightToScene(light: Light): void {
-    if (light instanceof PointLight) {
+    if (light instanceof AmbientLight) {
+      light.name = Editor.NAME_AMBIENT;
+    } else {
       light.name = Editor.NAME_LIGHT;
 
       // Add temp object to control light position
-      const lightObj = new SphereGeometry(0.2);
+      let lightObj: any = new SphereGeometry(0.2);
+
+      if (light instanceof DirectionalLight) {
+        lightObj = new ConeGeometry(0.5, 1, 2.5);
+
+        const helper = new DirectionalLightHelper(light, 5, new Color(0, 0, 0));
+        this.helpers.push(helper);
+        this.addObjectToScene(helper);
+      }
+
       const material = new MeshPhongMaterial({
         color: 0xffff00,
         reflectivity: 1
@@ -272,8 +290,6 @@ export default class Editor {
       this.helpers.push(lightMesh);
 
       this.addObjectToScene(lightMesh);
-    } else if (light instanceof AmbientLight) {
-      light.name = Editor.NAME_AMBIENT;
     }
 
     this.scene.add(light);

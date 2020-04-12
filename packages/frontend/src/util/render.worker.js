@@ -1,7 +1,9 @@
-import {RayTracer, SceneLoader, Editor} from "draycer";
+import {RayTracer, SceneLoader, Editor, Color} from "draycer";
+
+const renderers = {};
 
   onmessage = function ({data}) {
-    if (data.what === "START_RENDER")
+    if (data.what === "RENDER_BLOCK")
       (async () => {
         await startRender(data.job);
       })()
@@ -12,54 +14,54 @@ import {RayTracer, SceneLoader, Editor} from "draycer";
                                xStart,
                                yStart,
                                yEnd,
+                               xEnd,
                                height,
                                width,
-                               id
+                               jobId,
+                               blockId
                              }) {
+    let renderer = renderers[jobId];
+    if (renderer == undefined) {
+      const parsedScene = await SceneLoader.load(scene);
+      console.log("EVENT: SCENE_PARSED");
 
+      for(const obj of parsedScene.children) {
+        obj.matrixWorld = obj.matrix;
+      }
 
-    const parsedScene = await SceneLoader.load(scene);
-    console.log("EVENT: SCENE_PARSED");
+      const camera = parsedScene.getObjectByName(Editor.NAME_CAMERA);
+      // These attributes are missing from the exported camera obj and need to be set manually
+      camera.matrixWorldInverse = camera.userData.matrixWorldInverse;
 
-    for(const obj of parsedScene.children) {
-      obj.matrixWorld = obj.matrix;
+      renderer = new RayTracer(
+        parsedScene,
+        width,
+        height
+      );
+
+      renderers[jobId] = renderer;
     }
 
-    const camera = parsedScene.getObjectByName(Editor.NAME_CAMERA);
-    // These attributes are missing from the exported camera obj and need to be set manually
-    camera.matrixWorldInverse = camera.userData.matrixWorldInverse;
 
-    console.log(parsedScene);
-
-    const tracer = new RayTracer(
-      parsedScene,
-      width,
-      height
-    );
+    const renders = [];
 
     for (let y = yStart; y < yEnd; y++) {
-      const renders = [];
-      for (let x = xStart; x < width; x++) {
-        const color = tracer.tracedValueAtPixel(x, y);
-        if (color.g > 255 || color.g < 0 )
-          console.log(`X: ${x} Y: ${y} `, color);
+      for (let x = xStart; x < xEnd; x++) {
+        const color = renderer.tracedValueAtPixel(x, y);
         renders.push({
           coord: {x, y},
           color
         });
       }
 
-      postMessage({
-        what: "ROW_RENDERED",
-        renders,
-        id,
-        y
-      });
     }
 
-    console.log("EVENT: RENDER_COMPLETED id= ", id);
+
     postMessage({
-      what: "RENDER_COMPLETED",
-      id
+      what: "BLOCK_RENDERED",
+      renders,
+      jobId,
+      blockId
     });
+
   }

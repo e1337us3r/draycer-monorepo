@@ -10,7 +10,7 @@ import {
   SphereGeometry,
   BoxGeometry,
   ConeGeometry,
-    Vector2
+  Vector2, DirectionalLight
 } from "three";
 import axios from "axios";
 import CONFIG from "../config";

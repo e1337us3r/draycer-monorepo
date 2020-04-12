@@ -11,6 +11,8 @@ import Button from "@material-ui/core/Button";
 import socketIOClient from "socket.io-client";
 import CONFIG from "../config";
 import Worker from "../util/render.worker"
+import {RayTracer, SceneLoader, Editor, Color} from "draycer";
+
 
 
 const useStyles = makeStyles({
@@ -26,24 +28,67 @@ export default function Services() {
 
         const socket = socketIOClient(CONFIG.serverSocketUrl);
 
+        const renderers = {};
+
         const worker = new Worker();
-        socket.on("START_RENDER", async (job) => {
-            console.log("EVENT: START_RENDER | id= " + job.id);
+        socket.on("RENDER_BLOCK", async (job) => {
 
-            worker.onmessage = ({data}) => {
-                if (data.what === "ROW_RENDERED"){
-                    socket.emit("ROW_RENDERED", {
-                        id: data.id,
-                        renders: data.renders
-                    });
-                    console.log(`EVENT: ROW_RENDERED | id= ${job.id}| Y=${data.y}`);
+            const {yStart, yEnd, xEnd, xStart, jobId, blockId, scene, width, height} = job;
+            let renderer = renderers[jobId];
+            if (renderer == undefined) {
+                const parsedScene = await SceneLoader.load(scene);
+                console.log("EVENT: SCENE_PARSED", parsedScene);
+
+                for(const obj of parsedScene.children) {
+                    obj.matrixWorld = obj.matrix;
                 }
-            };
 
-            worker.postMessage({
-                what: "START_RENDER",
-                job
-            })
+                const camera = parsedScene.getObjectByName(Editor.NAME_CAMERA);
+                // These attributes are missing from the exported camera obj and need to be set manually
+                camera.matrixWorldInverse = camera.userData.matrixWorldInverse;
+
+                renderer = new RayTracer(
+                  parsedScene,
+                  width,
+                  height
+                );
+                await renderer.loadTextures();
+
+                renderers[job.jobId] = renderer;
+            }
+
+            console.log("EVENT: RENDER_BLOCK | id= " + jobId);
+
+
+            const renders = [];
+
+            for (let y = yStart; y < yEnd; y++) {
+                for (let x = xStart; x < xEnd; x++) {
+                    const color = renderer.tracedValueAtPixel(x, y);
+                    renders.push({
+                        coord: {x, y},
+                        color
+                    });
+                }
+
+            }
+            socket.emit("BLOCK_RENDERED", {
+                jobId,
+                renders,
+                blockId,
+            });
+            console.log(`EVENT: BLOCK_RENDERED | id= ${job.jobId}| blockId=${blockId}`);
+
+            // worker.onmessage = ({data}) => {
+            //     if (data.what === "BLOCK_RENDERED"){
+            //
+            //     }
+            // };
+
+            // worker.postMessage({
+            //     what: "RENDER_BLOCK",
+            //     job
+            // })
         });
 
 
