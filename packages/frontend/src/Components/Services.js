@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -12,6 +12,7 @@ import socketIOClient from "socket.io-client";
 import CONFIG from "../config";
 import Worker from "../util/render.worker"
 import {RayTracer, SceneLoader, Editor, Color} from "draycer";
+import history from "./history";
 
 
 
@@ -21,8 +22,32 @@ const useStyles = makeStyles({
     }
 });
 
+
+function TaskList(props) {
+    const tasks = Object.values(props.tasks);
+    console.log("2",tasks);
+
+    return (
+      <TableBody>
+          {tasks.map((item, index) => {
+              return (
+                <TableRow key={item.jobId}>
+                    <TableCell align="right" component="th" scope="row">
+                        {item.jobId}
+                    </TableCell>
+                    <TableCell align="right">{item.latestBlockId}</TableCell>
+                    <TableCell align="right">{item.renderedBlockCount}</TableCell>
+                    <TableCell align="right">{item.status}</TableCell>
+                </TableRow>
+              );
+          })}
+      </TableBody>
+    );
+}
+
 export default function Services() {
     const classes = useStyles();
+    const [tasks, setTasks] = useState({});
 
     useEffect(()=>{
 
@@ -32,6 +57,25 @@ export default function Services() {
 
         const worker = new Worker();
         socket.on("RENDER_BLOCK", async (job) => {
+
+           /* const task = tasks[job.jobId];
+            
+            if (task) {
+                task.latestBlockId = job.blockId;
+                task.renderedBlockCount++;
+            } else {
+                tasks[job.jobId] = {
+                    jobId: job.jobId,
+                    renderedBlockCount: 0,
+                    latestBlockId: job.blockId,
+                    status: "rendering"
+                }
+            }
+            console.log("1", tasks);
+
+            // BUG: uncommenting this line blows up memory and crashes tab
+            //setTasks({...tasks});*/
+
 
             const {yStart, yEnd, xEnd, xStart, jobId, blockId, scene, width, height} = job;
             let renderer = renderers[jobId];
@@ -95,7 +139,7 @@ export default function Services() {
         return () => {
             socket.disconnect();
         }
-    },[]);
+    },[tasks]);
 
     return (
         <div>
@@ -103,88 +147,13 @@ export default function Services() {
                 <Table className={classes.table} aria-label="simple table">
                     <TableHead>
                         <TableRow>
-                            <TableCell>ID</TableCell>
-                            <TableCell align="right">Owner</TableCell>
-                            <TableCell align="right">Task</TableCell>
-                            <TableCell align="right">Completed</TableCell>
-                            <TableCell align="right">Assigned</TableCell>
+                            <TableCell align="right">Job Id</TableCell>
+                            <TableCell align="right">Latest Block Id</TableCell>
+                            <TableCell align="right">Rendered Block Count</TableCell>
                             <TableCell align="right">Status</TableCell>
-                            <TableCell align="right"></TableCell>
                         </TableRow>
                     </TableHead>
-                    <TableBody>
-                        <TableRow>
-                            <TableCell component="th" scope="row">
-                                1552346
-                            </TableCell>
-                            <TableCell align="right">SuperRenderer23</TableCell>
-                            <TableCell align="right">Movie #1</TableCell>
-                            <TableCell align="right">5345/5563</TableCell>
-                            <TableCell align="right">15</TableCell>
-                            <TableCell align="right">In Progress</TableCell>
-                            <TableCell align="right">
-                                <Button variant="contained" color="secondary">
-                                    PAUSE
-                                </Button>
-                            </TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell component="th" scope="row">
-                                1552346
-                            </TableCell>
-                            <TableCell align="right">Disney</TableCell>
-                            <TableCell align="right">
-                                The Cute Prince & Princess
-                            </TableCell>
-                            <TableCell align="right">24311/345145</TableCell>
-                            <TableCell align="right">5623</TableCell>
-                            <TableCell align="right">In Progress</TableCell>
-                            <TableCell align="right">
-                                <Button variant="contained" color="secondary">
-                                    PAUSE
-                                </Button>
-                            </TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell component="th" scope="row">
-                                1552346
-                            </TableCell>
-                            <TableCell align="right">Marvel</TableCell>
-                            <TableCell align="right">Batman Animated</TableCell>
-                            <TableCell align="right">2301/98855</TableCell>
-                            <TableCell align="right">853</TableCell>
-                            <TableCell align="right">In Progress</TableCell>
-                            <TableCell align="right">
-                                <Button variant="contained" color="secondary">
-                                    PAUSE
-                                </Button>
-                            </TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell component="th" scope="row">
-                                1552346
-                            </TableCell>
-                            <TableCell align="right">Pixar</TableCell>
-                            <TableCell align="right">
-                                Star Wars: Sith Warrior
-                            </TableCell>
-                            <TableCell align="right">455123/455123</TableCell>
-                            <TableCell align="right">-</TableCell>
-                            <TableCell align="right">Completed</TableCell>
-                            <TableCell align="right"></TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell component="th" scope="row">
-                                9882834
-                            </TableCell>
-                            <TableCell align="right">MikeJackson</TableCell>
-                            <TableCell align="right">Kitchen</TableCell>
-                            <TableCell align="right">15345</TableCell>
-                            <TableCell align="right">-</TableCell>
-                            <TableCell align="right">Completed</TableCell>
-                            <TableCell align="right"></TableCell>
-                        </TableRow>
-                    </TableBody>
+                    <TaskList tasks={tasks} />
                 </Table>
             </TableContainer>
             <Button variant="contained" color="secondary">
