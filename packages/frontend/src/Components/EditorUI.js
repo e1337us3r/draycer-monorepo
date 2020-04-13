@@ -161,7 +161,12 @@ const EditorUI = () => {
     };
 
     const uploadSelectedModel = event => {
-        if (event.target.files) EDITOR.uploadObjectToScene(event.target.files);
+        //if (event.target.files) EDITOR.uploadObjectToScene(event.target.files);
+        if (event.target.files[0]) {
+            EDITOR.uploadObject(
+                URL.createObjectURL(event.target.files[0])
+            );
+        }
     };
 
     const uploadSelectedTexture = event => {

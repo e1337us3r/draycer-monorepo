@@ -28,6 +28,7 @@ import {
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { TransformControls } from "three/examples/jsm/controls/TransformControls";
+import { OBJLoader2 } from "three/examples/jsm/loaders/OBJLoader2";
 import ObjectUploader from "./ObjectUploader";
 
 export default class Editor {
@@ -290,6 +291,19 @@ export default class Editor {
     }
 
     this.scene.add(light);
+  }
+
+  public uploadObject(path: string): void {
+    const objLoader = new OBJLoader2();
+    objLoader.load(path, object3d => {
+      object3d.position.set(0, 0, 0);
+      const material = new MeshPhongMaterial({
+        color: 0x00ff00,
+        reflectivity: 1
+      });
+      (object3d.children[0] as Mesh).material = material;
+      this.addObjectToScene(object3d.children[0]);
+    });
   }
 
   public uploadObjectToScene(files: File[]): void {
