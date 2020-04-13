@@ -24,6 +24,7 @@ import Brightness7Icon from "@material-ui/icons/Brightness7";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import TextureIcon from "@material-ui/icons/Texture";
 import styled from "styled-components";
+import fs from "fs";
 
 const P = styled.p`
     color: #539ffe;
@@ -166,7 +167,13 @@ const EditorUI = () => {
     };
 
     const clickSaveScene = event => {
-        event.target.href = EDITOR.getRenderingScene().toJSON();
+        const fileData = JSON.stringify(EDITOR.getRenderingScene()); // convert function outp to json string
+        const blob = new Blob([fileData], { type: "text/plain" }); // create the object file type
+        const url = URL.createObjectURL(blob); // bunu daha once kullanmistik zaten
+        const link = document.createElement("a"); // create an element <a> that will be executed with the click function
+        link.download = "editor-output.json";
+        link.href = url;
+        link.click();
     };
 
     const downloadRender = event => {
@@ -183,7 +190,7 @@ const EditorUI = () => {
     const clickUploadLoadScene = () => {
         document.querySelector("#load-scene").click();
     };
-    
+
     return (
         <div
             style={{
@@ -400,7 +407,9 @@ const EditorUI = () => {
                         </P>
                         <div>
                             <ButtonGroup variant="outlined" color="secondary">
-                                <Button>Save Scene</Button>
+                                <Button onClick={clickSaveScene}>
+                                    Save Scene
+                                </Button>
                                 <Button onClick={clickUploadLoadScene}>
                                     Load Scene
                                     <input
