@@ -51,7 +51,7 @@ function TaskList(props) {
                                 ? `${percentage}%`
                                 : ""}{" "}
                         </TableCell>
-                        {item.ended_at === null ? (
+                        {item.ended_at === "completed" ? (
                             <TableCell align="right">
                                 <Button
                                     onClick={() => {
@@ -64,7 +64,11 @@ function TaskList(props) {
                                 </Button>
                             </TableCell>
                         ) : (
-                            ""
+                            <TableCell align="right">
+                                <Button variant="contained" color="secondary">
+                                    In Progress
+                                </Button>
+                            </TableCell>
                         )}
                     </TableRow>
                 );
