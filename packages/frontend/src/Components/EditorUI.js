@@ -165,6 +165,10 @@ const EditorUI = () => {
             );
     };
 
+    const clickSaveScene = event => {
+        event.target.href = EDITOR.getRenderingScene().toJSON();
+    };
+
     const downloadRender = event => {
         event.target.href = imageCanvas.toDataURL("image/png");
     };
@@ -179,7 +183,7 @@ const EditorUI = () => {
     const clickUploadLoadScene = () => {
         document.querySelector("#load-scene").click();
     };
-
+    
     return (
         <div
             style={{
