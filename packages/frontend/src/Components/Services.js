@@ -81,15 +81,6 @@ export default function Services() {
             let renderer = renderers[jobId];
             if (renderer == undefined) {
                 const parsedScene = await SceneLoader.load(scene);
-                console.log("EVENT: SCENE_PARSED", parsedScene);
-
-                for(const obj of parsedScene.children) {
-                    obj.matrixWorld = obj.matrix;
-                }
-
-                const camera = parsedScene.getObjectByName(Editor.NAME_CAMERA);
-                // These attributes are missing from the exported camera obj and need to be set manually
-                camera.matrixWorldInverse = camera.userData.matrixWorldInverse;
 
                 renderer = new RayTracer(
                   parsedScene,
