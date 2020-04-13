@@ -63,6 +63,7 @@ const EditorUI = () => {
                     EDITOR.selectObjects(mouse);
                     if (editorRendered.current && EDITOR?.selectedObject) {
                         setSelectedObject(EDITOR.selectedObject.material);
+                        console.log("test", EDITOR.selectedObject);
                     }
                 },
                 false
@@ -174,6 +175,15 @@ const EditorUI = () => {
             EDITOR.setTextureSelected(
                 URL.createObjectURL(event.target.files[0])
             );
+    };
+
+    const setSelectedObjectColor = event => {
+        const color = new Color(event.color);
+
+        if (EDITOR.selectedObject) {
+            EDITOR.selectedObject.material.color = color;
+        }
+
     };
 
     const uploadScene = event => {
