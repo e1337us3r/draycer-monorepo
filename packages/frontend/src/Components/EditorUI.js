@@ -23,6 +23,11 @@ import ChangeHistoryIcon from "@material-ui/icons/ChangeHistory";
 import Brightness7Icon from "@material-ui/icons/Brightness7";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import TextureIcon from "@material-ui/icons/Texture";
+import styled from "styled-components";
+
+const P = styled.p`
+    color: #539ffe;
+`;
 
 const EditorUI = () => {
     const [showResult, setShowResult] = useState(false);
@@ -192,28 +197,62 @@ const EditorUI = () => {
                     height: "100%"
                 }}
             >
-                <h2>Keyboard Shortcuts</h2>
-                <div>
-                    <h4>Object Transform</h4>
-                    <p>'W': Translate</p>
-                    <p>'E' = Rotate</p>
-                    <p>'R' = Scale</p>
-                    <p>'Del' = Delete</p>
+                <P style={{ fontSize: "1.4rem", fontWeight: "bold" }}>
+                    Keyboard Shortcuts
+                </P>
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                    <P style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
+                        Object Transform
+                    </P>
+                    <P>
+                        <span style={{ color: "#f48fb1" }}>'W'</span> =
+                        Translate
+                    </P>
+                    <P>
+                        <span style={{ color: "#f48fb1" }}>'E'</span> = Rotate
+                    </P>
+                    <P>
+                        <span style={{ color: "#f48fb1" }}>'R'</span> = Scale
+                    </P>
+                    <P>
+                        <span style={{ color: "#f48fb1" }}>'Del'</span> = Delete
+                    </P>
                 </div>
                 <div>
-                    <h4>Transform Controller</h4>
-                    <p>'+' = Increase Controller Size</p>
-                    <p>'-' = Decrease Controller Size</p>
-                    <p>'Space' = Toggle Controller</p>
-                    <p>'X' = Toggle X Dimension</p>
-                    <p>'Y' = Toggle Y Dimension</p>
-                    <p>'Z' = Toggle Z Dimension</p>
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                        <P style={{ fontSize: "1.4rem", fontWeight: "bold" }}>
+                            Transform Controller
+                        </P>
+                        <P>
+                            <span style={{ color: "#f48fb1" }}>'+'</span> =
+                            Increase Controller Size
+                        </P>
+                        <P>
+                            <span style={{ color: "#f48fb1" }}>'-'</span> =
+                            Decrease Controller Size
+                        </P>
+                        <P>
+                            <span style={{ color: "#f48fb1" }}>'Space'</span> =
+                            Toggle Controller
+                        </P>
+                        <P>
+                            <span style={{ color: "#f48fb1" }}>'X'</span> =
+                            Toggle X Dimension
+                        </P>
+                        <P>
+                            <span style={{ color: "#f48fb1" }}>'Y'</span> =
+                            Toggle Y Dimension
+                        </P>
+                        <P>
+                            <span style={{ color: "#f48fb1" }}>'Z'</span> =
+                            Toggle Z Dimension
+                        </P>
+                    </div>
                 </div>
             </Paper>
             <div
                 id="editor"
                 style={{
-                    flex: "0 0 60%",
                     margin: "10px auto",
                     display: "flex"
                 }}
@@ -314,12 +353,13 @@ const EditorUI = () => {
                     }}
                 >
                     <div>
-                        <p>
-                            <b>Primitive Objects;</b>
-                        </p>
+                        <P>
+                            <b>Primitive Objects</b>
+                        </P>
                         <ButtonGroup
                             style={{
                                 display: "flex",
+                                flexDirection: "row wrap",
                                 justifyContent: "space-evenly"
                             }}
                         >
@@ -337,9 +377,9 @@ const EditorUI = () => {
                             </Button>
                         </ButtonGroup>
                         <br />
-                        <p>
+                        <P>
                             <b>Light Sources</b>
-                        </p>
+                        </P>
                         <div>
                             <Button
                                 variant="outlined"
@@ -351,9 +391,9 @@ const EditorUI = () => {
                             </Button>
                         </div>
                         <br />
-                        <p>
+                        <P>
                             <b>Scene</b>
-                        </p>
+                        </P>
                         <div>
                             <ButtonGroup variant="outlined" color="secondary">
                                 <Button>Save Scene</Button>
@@ -370,9 +410,9 @@ const EditorUI = () => {
                             </ButtonGroup>
                         </div>
                         <br />
-                        <p>
+                        <P>
                             <b>Model / Texture</b>
-                        </p>
+                        </P>
                         <div
                             style={{
                                 display: "flex",
@@ -440,7 +480,7 @@ const ObjectProperties = ({ object = {} }) => {
                 textAlign: "center"
             }}
         >
-            <h3>Object Details;</h3>
+            <h3>Object Details</h3>
             <div style={{ display: "flex", justifyContent: "space-evenly" }}>
                 <ul style={{ listStyleType: "none" }}>
                     {Object.keys(properties).map(key => {
