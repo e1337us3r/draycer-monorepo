@@ -5,6 +5,7 @@ import { Editor, RayTracer, Image } from "draycer";
 import {
     Color,
     PointLight,
+    DirectionalLight,
     MeshPhongMaterial,
     Mesh,
     SphereGeometry,
@@ -16,7 +17,7 @@ import axios from "axios";
 import CONFIG from "../config";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import Button from "@material-ui/core/Button";
-import { Paper } from "@material-ui/core";
+import { Paper, Input, TextField, Popover } from "@material-ui/core";
 import CropDinIcon from "@material-ui/icons/CropDin";
 import Brightness1Icon from "@material-ui/icons/Brightness1";
 import ChangeHistoryIcon from "@material-ui/icons/ChangeHistory";
@@ -24,8 +25,7 @@ import Brightness7Icon from "@material-ui/icons/Brightness7";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import TextureIcon from "@material-ui/icons/Texture";
 import styled from "styled-components";
-import fs from "fs";
-
+import { SketchPicker } from "react-color";
 const P = styled.p`
     color: #539ffe;
 `;
@@ -63,7 +63,6 @@ const EditorUI = () => {
                     EDITOR.selectObjects(mouse);
                     if (editorRendered.current && EDITOR?.selectedObject) {
                         setSelectedObject(EDITOR.selectedObject.material);
-                        console.log(EDITOR.selectedObject.material);
                     }
                 },
                 false
@@ -151,6 +150,12 @@ const EditorUI = () => {
 
     const addLight = () => {
         const light = new PointLight(new Color(0.5, 0.5, 0.5), 0.8, 100);
+        light.position.set(2, 2, 2);
+        EDITOR.addLightToScene(light);
+    };
+
+    const addDirectionalLight = () => {
+        const light = new DirectionalLight(new Color(0.5, 0.5, 0.5), 0.8);
         light.position.set(2, 2, 2);
         EDITOR.addLightToScene(light);
     };
@@ -364,7 +369,7 @@ const EditorUI = () => {
                     }}
                 >
                     <div>
-                        <P>
+                        <P style={{ fontSize: "1.3rem" }}>
                             <b>Primitive Objects</b>
                         </P>
                         <ButtonGroup
@@ -388,21 +393,35 @@ const EditorUI = () => {
                             </Button>
                         </ButtonGroup>
                         <br />
-                        <P>
+                        <P style={{ fontSize: "1.3rem" }}>
                             <b>Light Sources</b>
                         </P>
-                        <div>
+                        <ButtonGroup
+                            style={{
+                                display: "flex",
+                                flexDirection: "row wrap",
+                                justifyContent: "space-evenly"
+                            }}
+                        >
                             <Button
                                 variant="outlined"
                                 color="primary"
                                 onClick={addLight}
                             >
-                                <span>Add light: </span>
+                                <span>Point Light: </span>
                                 <Brightness7Icon />
                             </Button>
-                        </div>
+                            <Button
+                                variant="outlined"
+                                color="primary"
+                                onClick={addDirectionalLight}
+                            >
+                                <span>Directional Light: </span>
+                                <Brightness7Icon />
+                            </Button>
+                        </ButtonGroup>
                         <br />
-                        <P>
+                        <P style={{ fontSize: "1.3rem" }}>
                             <b>Scene</b>
                         </P>
                         <div>
@@ -423,7 +442,7 @@ const EditorUI = () => {
                             </ButtonGroup>
                         </div>
                         <br />
-                        <P>
+                        <P style={{ fontSize: "1.3rem" }}>
                             <b>Model / Texture</b>
                         </P>
                         <div
@@ -482,8 +501,23 @@ const EditorUI = () => {
 };
 
 const ObjectProperties = ({ object = {} }) => {
-    const { map, color, reflectivity, refractivity, specular } = object;
-    const properties = { map, color, reflectivity, refractivity, specular };
+    const { map, color, reflectivity, refractionRatio, specular } = object;
+    const properties = { map, color, reflectivity, refractionRatio, specular };
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const [ObjColor, setObjColor] = useState(color);
+
+    const handleChangeComplete = (color, event) => {
+        setObjColor(color.hex);
+    };
+    const handleClick = event => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const open = Boolean(anchorEl);
     return (
         <div
             style={{
@@ -493,16 +527,57 @@ const ObjectProperties = ({ object = {} }) => {
                 textAlign: "center"
             }}
         >
-            <h3>Object Details</h3>
+            <P style={{ fontSize: "1.3rem" }}>
+                <b>Object Details</b>
+            </P>
             <div style={{ display: "flex", justifyContent: "space-evenly" }}>
                 <ul style={{ listStyleType: "none" }}>
-                    {Object.keys(properties).map(key => {
-                        return (
-                            <li
-                                key={key}
-                            >{formatProperties`${key}: ${properties[key]}`}</li>
-                        );
-                    })}
+                    <li key={color}>
+                        Color:
+                        <Button
+                            style={{ marginLeft: "5px" }}
+                            variant="contained"
+                            onClick={handleClick}
+                            size="small"
+                            color="primary"
+                        >
+                            Select color
+                        </Button>
+                        <Popover
+                            open={open}
+                            anchorEl={anchorEl}
+                            onClose={handleClose}
+                            anchorOrigin={{
+                                vertical: "bottom",
+                                horizontal: "center"
+                            }}
+                            transformOrigin={{
+                                vertical: "top",
+                                horizontal: "center"
+                            }}
+                        >
+                            <SketchPicker
+                                color={ObjColor}
+                                onChangeComplete={handleChangeComplete}
+                            />
+                        </Popover>
+                    </li>
+                    <li key={reflectivity}>
+                        Reflectivity:{" "}
+                        <TextField
+                            style={{ width: "10%", marginLeft: "5px" }}
+                            size="small"
+                            value={reflectivity}
+                        />
+                    </li>
+                    <li key={refractionRatio}>
+                        Refraction ratio:{" "}
+                        <TextField
+                            style={{ width: "10%", marginLeft: "5px" }}
+                            size="small"
+                            value={refractionRatio}
+                        />
+                    </li>
                 </ul>
             </div>
         </div>
@@ -516,12 +591,8 @@ const formatProperties = (strings, ...values) => {
                 typeof values[ind - 1] === "object" &&
                 values[ind - 1] !== null
             ) {
-                return Object.keys(values[ind - 1]).map(
-                    key =>
-                        key +
-                        ": " +
-                        Number(values[ind - 1][key]).toFixed(2) +
-                        ", "
+                return Object.keys(values[ind - 1]).map(key =>
+                    Number(values[ind - 1][key]).toFixed(2)
                 );
             }
             return String(values[ind - 1]) + " ";
