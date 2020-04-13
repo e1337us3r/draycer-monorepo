@@ -1,5 +1,5 @@
 import { Scene, ObjectLoader } from "three";
-import { Editor } from "../../dist";
+import Editor from "../Editor";
 
 export default class SceneLoader {
   private static loader = new ObjectLoader();
@@ -14,7 +14,7 @@ export default class SceneLoader {
         }
 
         const camera = scene.getObjectByName(Editor.NAME_CAMERA);
-        // These attributes are missing from the exported camera obj and need to be set manually
+        // These attributes are missing from the exported camera obj and need to be set manually-
         // @ts-ignore
         camera.matrixWorldInverse = camera.userData.matrixWorldInverse;
 

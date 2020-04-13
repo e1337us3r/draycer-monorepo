@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import history from "./history";
 import firebase from "./auth/firebase";
-import { Editor, RayTracer, Image } from "draycer";
+import { Editor, RayTracer, Image, SceneLoader } from "draycer";
 import {
     Color,
     PointLight,
@@ -24,7 +24,6 @@ import Brightness7Icon from "@material-ui/icons/Brightness7";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import TextureIcon from "@material-ui/icons/Texture";
 import styled from "styled-components";
-import fs from "fs";
 
 const P = styled.p`
     color: #539ffe;
@@ -71,7 +70,7 @@ const EditorUI = () => {
 
             EDITOR.initialize(editorCanvas);
 
-            const animate = () => {
+           const animate = () => {
                 requestAnimationFrame(animate);
                 EDITOR.render();
             };
@@ -166,15 +165,8 @@ const EditorUI = () => {
             );
     };
 
-    const uploadScene = event => {
-        if (event.target.files[0])
-            EDITOR.uploadScene(
-                event.target.files[0]
-            );
-    };
-
     const clickSaveScene = event => {
-        const fileData = JSON.stringify(EDITOR.getRenderingScene()); // convert function outp to json string
+        const fileData = JSON.stringify(EDITOR.getRenderingScene().toJSON()); // convert function outp to json string
         const blob = new Blob([fileData], { type: "text/plain" }); // create the object file type
         const url = URL.createObjectURL(blob); // bunu daha once kullanmistik zaten
         const link = document.createElement("a"); // create an element <a> that will be executed with the click function
