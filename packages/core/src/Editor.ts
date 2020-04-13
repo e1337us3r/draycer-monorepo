@@ -317,6 +317,17 @@ export default class Editor {
     }
   }
 
+  public uploadScene(scene: any): void {
+    const reader = new FileReader();
+    reader.onload = (event): void => {
+      // @ts-ignore
+      const json = JSON.parse(event.target.result);
+      console.log(json);
+    };
+    
+    reader.readAsText(scene);
+  }
+
   // Public uploadTexture(files: File[]): void {
   // This.textureLoader.getTextureLoading()
   // }
