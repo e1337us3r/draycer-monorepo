@@ -55,26 +55,23 @@ export default class Editor {
     this.objectLoader = new ObjectUploader(this);
     this.textureLoader = new TextureLoader();
     this.rayCaster = new Raycaster();
-
     if (scene) {
       this.camera = scene.getObjectByName(
         Editor.NAME_CAMERA
       ) as PerspectiveCamera;
 
-      // These attributes are missing from the exported camera obj and need to be set manually
-      this.camera.matrixWorld = this.camera.matrix;
-      this.camera.matrixWorldInverse = this.camera.userData.matrixWorldInverse;
-    } else {
-      this.camera = new PerspectiveCamera(
-        75,
-        this.editorCanvas.width / this.editorCanvas.height,
-        0.1,
-        1000
-      );
-
-      this.camera.name = Editor.NAME_CAMERA;
-      this.scene.add(this.camera);
+      scene.remove(this.camera);
     }
+
+    this.camera = new PerspectiveCamera(
+      75,
+      this.editorCanvas.width / this.editorCanvas.height,
+      0.1,
+      1000
+    );
+
+    this.camera.name = Editor.NAME_CAMERA;
+    this.scene.add(this.camera);
 
     // Camera controls does not work without this line
     this.camera.position.set(-5, 5, 5);

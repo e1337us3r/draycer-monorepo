@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import history from "./history";
 import firebase from "./auth/firebase";
-import { Editor, RayTracer, Image } from "draycer";
+import { Editor, RayTracer, Image, SceneLoader } from "draycer";
 import {
     Color,
     PointLight,
@@ -172,7 +172,7 @@ const EditorUI = () => {
     };
 
     const clickSaveScene = event => {
-        const fileData = JSON.stringify(EDITOR.getRenderingScene()); // convert function outp to json string
+        const fileData = JSON.stringify(EDITOR.getRenderingScene().toJSON()); // convert function outp to json string
         const blob = new Blob([fileData], { type: "text/plain" }); // create the object file type
         const url = URL.createObjectURL(blob); // bunu daha once kullanmistik zaten
         const link = document.createElement("a"); // create an element <a> that will be executed with the click function
@@ -437,6 +437,7 @@ const EditorUI = () => {
                                         id="load-scene"
                                         accept=".json"
                                         hidden={true}
+                                        onChange={uploadScene}
                                     />
                                 </Button>
                             </ButtonGroup>
