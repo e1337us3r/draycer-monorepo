@@ -164,9 +164,7 @@ const EditorUI = () => {
     const uploadSelectedModel = event => {
         //if (event.target.files) EDITOR.uploadObjectToScene(event.target.files);
         if (event.target.files[0]) {
-            EDITOR.uploadObject(
-                URL.createObjectURL(event.target.files[0])
-            );
+            EDITOR.uploadObject(URL.createObjectURL(event.target.files[0]));
         }
     };
 
@@ -177,19 +175,21 @@ const EditorUI = () => {
             );
     };
 
-    const setSelectedObjectColor = event => {
-        const color = new Color(event.color);
+    const setSelectedObjectColor = color => {
+        const ObjColor = new Color(color);
 
-        if (EDITOR.selectedObject) {
-            EDITOR.selectedObject.material.color = color;
+        if (
+            EDITOR.selectedObject &&
+            color !== EDITOR.selectedObject.material.color
+        ) {
+            EDITOR.selectedObject.material.color = ObjColor;
         }
-
     };
 
     const uploadScene = event => {
         if (event.target.files[0]) {
             const reader = new FileReader();
-            reader.onload = async (event) => {
+            reader.onload = async event => {
                 const scene = JSON.parse(event.target.result);
 
                 const parsedScene = await SceneLoader.load(scene);
@@ -201,7 +201,6 @@ const EditorUI = () => {
                 };
 
                 animate();
-
             };
             reader.readAsText(event.target.files[0]);
         }
@@ -529,7 +528,10 @@ const EditorUI = () => {
                 </Paper>
                 <Paper>
                     {selectedObject && (
-                        <ObjectProperties object={selectedObject} />
+                        <ObjectProperties
+                            setColor={setSelectedObjectColor}
+                            object={selectedObject}
+                        />
                     )}
                 </Paper>
             </div>
@@ -537,7 +539,7 @@ const EditorUI = () => {
     );
 };
 
-const ObjectProperties = ({ object = {} }) => {
+const ObjectProperties = ({ object = {}, setColor }) => {
     const { map, color, reflectivity, refractionRatio, specular } = object;
     const properties = { map, color, reflectivity, refractionRatio, specular };
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -553,6 +555,10 @@ const ObjectProperties = ({ object = {} }) => {
     const handleClose = () => {
         setAnchorEl(null);
     };
+
+    useEffect(() => {
+        setColor(ObjColor);
+    }, [ObjColor, setColor]);
 
     const open = Boolean(anchorEl);
     return (
