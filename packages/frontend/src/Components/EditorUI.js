@@ -166,6 +166,13 @@ const EditorUI = () => {
             );
     };
 
+    const uploadScene = event => {
+        if (event.target.files[0])
+            EDITOR.uploadScene(
+                event.target.files[0]
+            );
+    };
+
     const clickSaveScene = event => {
         const fileData = JSON.stringify(EDITOR.getRenderingScene()); // convert function outp to json string
         const blob = new Blob([fileData], { type: "text/plain" }); // create the object file type
@@ -418,6 +425,7 @@ const EditorUI = () => {
                                         id="load-scene"
                                         accept=".json"
                                         hidden={true}
+                                        onChange={uploadScene}
                                     />
                                 </Button>
                             </ButtonGroup>
