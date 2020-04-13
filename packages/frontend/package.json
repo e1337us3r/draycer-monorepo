@@ -11,6 +11,7 @@
         "greenlet": "1.1.0",
         "react": "16.8.6",
         "react-app-rewired": "2.1.5",
+        "react-color": "^2.18.0",
         "react-dom": "16.8.6",
         "react-router-dom": "5.1.2",
         "react-scripts": "3.0.1",
