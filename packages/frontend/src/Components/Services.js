@@ -56,112 +56,106 @@ export default function Services() {
         const renderers = {};
 
         const worker = new Worker();
-        socket.on(
-            "RENDER_BLOCK",
-            async job => {
-                socket.on("RENDER_BLOCK", async job => {
-                    let task = tasks[job.jobId];
+        socket.on("RENDER_BLOCK", async job => {
+            socket.on("RENDER_BLOCK", async job => {
+                let task = tasks[job.jobId];
 
-                    if (task) {
-                        task.latestBlockId = job.blockId;
-                        task.renderedBlockCount++;
-                    } else {
-                        task = {
-                            jobId: job.jobId,
-                            renderedBlockCount: 0,
-                            latestBlockId: job.blockId,
-                            status: "rendering"
-                        };
+                if (task) {
+                    task.latestBlockId = job.blockId;
+                    task.renderedBlockCount++;
+                } else {
+                    task = {
+                        jobId: job.jobId,
+                        renderedBlockCount: 0,
+                        latestBlockId: job.blockId,
+                        status: "rendering"
+                    };
+                }
+                console.log("1", tasks);
+
+                setTasks({ ...tasks, [job.jobId]: task });
+
+                const {
+                    yStart,
+                    yEnd,
+                    xEnd,
+                    xStart,
+                    jobId,
+                    blockId,
+                    scene,
+                    width,
+                    height
+                } = job;
+                let renderer = renderers[jobId];
+                if (renderer == undefined) {
+                    const parsedScene = await SceneLoader.load(scene);
+
+                    renderer = new RayTracer(parsedScene, width, height);
+                    await renderer.loadTextures();
+
+                    renderers[job.jobId] = renderer;
+                }
+
+                console.log("EVENT: RENDER_BLOCK | id= " + jobId);
+
+                const renders = [];
+
+                for (let y = yStart; y < yEnd; y++) {
+                    for (let x = xStart; x < xEnd; x++) {
+                        const color = renderer.tracedValueAtPixel(x, y);
+                        renders.push({
+                            coord: { x, y },
+                            color
+                        });
                     }
-                    console.log("1", tasks);
-
-                    setTasks({ ...tasks, [job.jobId]: task });
-
-                    const {
-                        yStart,
-                        yEnd,
-                        xEnd,
-                        xStart,
-                        jobId,
-                        blockId,
-                        scene,
-                        width,
-                        height
-                    } = job;
-                    let renderer = renderers[jobId];
-                    if (renderer == undefined) {
-                        const parsedScene = await SceneLoader.load(scene);
-
-                        renderer = new RayTracer(parsedScene, width, height);
-                        await renderer.loadTextures();
-
-                        renderers[job.jobId] = renderer;
-                    }
-
-                    console.log("EVENT: RENDER_BLOCK | id= " + jobId);
-
-                    const renders = [];
-
-                    for (let y = yStart; y < yEnd; y++) {
-                        for (let x = xStart; x < xEnd; x++) {
-                            const color = renderer.tracedValueAtPixel(x, y);
-                            renders.push({
-                                coord: { x, y },
-                                color
-                            });
-                        }
-                    }
-                    socket.emit("BLOCK_RENDERED", {
-                        jobId,
-                        renders,
-                        blockId
-                    });
-                    console.log(
-                        `EVENT: BLOCK_RENDERED | id= ${job.jobId}| blockId=${blockId}`
-                    );
-
-                    // worker.onmessage = ({data}) => {
-                    //     if (data.what === "BLOCK_RENDERED"){
-                    //
-                    //     }
-                    // };
-
-                    // worker.postMessage({
-                    //     what: "RENDER_BLOCK",
-                    //     job
-                    // })
+                }
+                socket.emit("BLOCK_RENDERED", {
+                    jobId,
+                    renders,
+                    blockId
                 });
+                console.log(
+                    `EVENT: BLOCK_RENDERED | id= ${job.jobId}| blockId=${blockId}`
+                );
 
-                return () => {
-                    socket.disconnect();
-                };
-            },
-            [tasks]
-        );
+                // worker.onmessage = ({data}) => {
+                //     if (data.what === "BLOCK_RENDERED"){
+                //
+                //     }
+                // };
 
-        return (
-            <div>
-                <TableContainer component={Paper} style={{ marginTop: "5%" }}>
-                    <Table className={classes.table} aria-label="simple table">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell align="right">Job Id</TableCell>
-                                <TableCell align="right">
-                                    Latest Block Id
-                                </TableCell>
-                                <TableCell align="right">
-                                    Rendered Block Count
-                                </TableCell>
-                                <TableCell align="right">Status</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TaskList tasks={tasks} />
-                    </Table>
-                </TableContainer>
-                <Button variant="contained" color="secondary">
-                    STOP ALL
-                </Button>
-            </div>
-        );
-    }, []);
+                // worker.postMessage({
+                //     what: "RENDER_BLOCK",
+                //     job
+                // })
+            });
+        });
+
+        return () => {
+            socket.disconnect();
+        };
+    }, [tasks]);
+
+    return (
+        <div>
+            <TableContainer component={Paper} style={{ marginTop: "5%" }}>
+                <Table className={classes.table} aria-label="simple table">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell align="right">Job Id</TableCell>
+                            <TableCell align="right">Latest Block Id</TableCell>
+                            <TableCell align="right">
+                                Rendered Block Count
+                            </TableCell>
+                            <TableCell align="right">Status</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TaskList tasks={tasks} />
+                </Table>
+            </TableContainer>
+            <Button variant="contained" color="secondary">
+                STOP ALL
+            </Button>
+        </div>
+    );
 }
