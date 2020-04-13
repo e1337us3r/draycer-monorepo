@@ -171,6 +171,27 @@ const EditorUI = () => {
             );
     };
 
+    const uploadScene = event => {
+        if (event.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                const scene = JSON.parse(event.target.result);
+
+                const parsedScene = await SceneLoader.load(scene);
+                EDITOR.initialize(editorCanvas, parsedScene);
+
+                const animate = () => {
+                    requestAnimationFrame(animate);
+                    EDITOR.render();
+                };
+
+                animate();
+
+            };
+            reader.readAsText(event.target.files[0]);
+        }
+    };
+
     const clickSaveScene = event => {
         const fileData = JSON.stringify(EDITOR.getRenderingScene().toJSON()); // convert function outp to json string
         const blob = new Blob([fileData], { type: "text/plain" }); // create the object file type
