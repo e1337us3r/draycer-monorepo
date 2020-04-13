@@ -58,13 +58,14 @@ export default function Services() {
         const worker = new Worker();
         socket.on("RENDER_BLOCK", async (job) => {
 
-           /* const task = tasks[job.jobId];
-            
+        socket.on("RENDER_BLOCK", async job => {
+            let task = tasks[job.jobId];
+
             if (task) {
                 task.latestBlockId = job.blockId;
                 task.renderedBlockCount++;
             } else {
-                tasks[job.jobId] = {
+                task = {
                     jobId: job.jobId,
                     renderedBlockCount: 0,
                     latestBlockId: job.blockId,
@@ -73,8 +74,7 @@ export default function Services() {
             }
             console.log("1", tasks);
 
-            // BUG: uncommenting this line blows up memory and crashes tab
-            //setTasks({...tasks});*/
+            setTasks({ ...tasks, [job.jobId]: task });
 
 
             const {yStart, yEnd, xEnd, xStart, jobId, blockId, scene, width, height} = job;
