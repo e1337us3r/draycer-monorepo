@@ -13,7 +13,6 @@ import CONFIG from "../config";
 import Worker from "../util/render.worker";
 import { RayTracer, SceneLoader, Editor, Color } from "draycer";
 import history from "./history";
-import { useRef } from "react";
 
 const useStyles = makeStyles({
     table: {
@@ -26,24 +25,24 @@ function TaskList(props) {
     console.log("2", tasks);
 
     return (
-        <TableBody>
-            {tasks.map((item, index) => {
-                return (
-                    <TableRow key={item.jobId}>
-                        <TableCell align="right" component="th" scope="row">
-                            {item.jobId}
-                        </TableCell>
-                        <TableCell align="right">
-                            {item.latestBlockId}
-                        </TableCell>
-                        <TableCell align="right">
-                            {item.renderedBlockCount}
-                        </TableCell>
-                        <TableCell align="right">{item.status}</TableCell>
-                    </TableRow>
-                );
-            })}
-        </TableBody>
+      <TableBody>
+          {tasks.map((item, index) => {
+              return (
+                <TableRow key={item.jobId}>
+                    <TableCell align="right" component="th" scope="row">
+                        {item.jobId}
+                    </TableCell>
+                    <TableCell align="right">
+                        {item.latestBlockId}
+                    </TableCell>
+                    <TableCell align="right">
+                        {item.renderedBlockCount}
+                    </TableCell>
+                    <TableCell align="right">{item.status}</TableCell>
+                </TableRow>
+              );
+          })}
+      </TableBody>
     );
 }
 
@@ -51,17 +50,15 @@ export default function Services() {
     const classes = useStyles();
     const [tasks, setTasks] = useState({});
     const socket = socketIOClient(CONFIG.serverSocketUrl);
-    const firstRender = useRef(true);
     useEffect(() => {
         const renderers = {};
-        console.log("here");
+
         socket.on("RENDER_BLOCK", async job => {
             let task = tasks[job.jobId];
 
             if (task) {
                 task.latestBlockId = job.blockId;
                 task.renderedBlockCount++;
-                setTasks({ ...tasks, ...task });
             } else {
                 task = {
                     jobId: job.jobId,
@@ -69,9 +66,10 @@ export default function Services() {
                     latestBlockId: job.blockId,
                     status: "rendering"
                 };
-                setTasks({ ...tasks, [job.jobId]: task });
             }
             console.log("1", tasks);
+
+            setTasks({ ...tasks, [job.jobId]: task });
 
             const {
                 yStart,
@@ -85,40 +83,37 @@ export default function Services() {
                 height
             } = job;
             let renderer = renderers[jobId];
-            if (firstRender.current === true && renderer === undefined) {
+            if (renderer == undefined) {
                 const parsedScene = await SceneLoader.load(scene);
-                console.log("rendere");
+
                 renderer = new RayTracer(parsedScene, width, height);
                 await renderer.loadTextures();
 
                 renderers[job.jobId] = renderer;
-                firstRender.current = false;
             }
 
             console.log("EVENT: RENDER_BLOCK | id= " + jobId);
 
             const renders = [];
 
-            if (renderer) {
-                for (let y = yStart; y < yEnd; y++) {
-                    for (let x = xStart; x < xEnd; x++) {
-                        const color = renderer.tracedValueAtPixel(x, y);
-                        renders.push({
-                            coord: { x, y },
-                            color
-                        });
-                    }
+            for (let y = yStart; y < yEnd; y++) {
+                for (let x = xStart; x < xEnd; x++) {
+                    const color = renderer.tracedValueAtPixel(x, y);
+                    renders.push({
+                        coord: { x, y },
+                        color
+                    });
                 }
             }
-
             socket.emit("BLOCK_RENDERED", {
                 jobId,
                 renders,
                 blockId
             });
             console.log(
-                `EVENT: BLOCK_RENDERED | id= ${job.jobId}| blockId=${blockId}`
+              `EVENT: BLOCK_RENDERED | id= ${job.jobId}| blockId=${blockId}`
             );
+
             // worker.onmessage = ({data}) => {
             //     if (data.what === "BLOCK_RENDERED"){
             //
@@ -134,28 +129,28 @@ export default function Services() {
         return () => {
             socket.disconnect();
         };
-    }, [tasks, socket]);
+    }, []);
 
     return (
-        <div>
-            <TableContainer component={Paper} style={{ marginTop: "5%" }}>
-                <Table className={classes.table} aria-label="simple table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell align="right">Job Id</TableCell>
-                            <TableCell align="right">Latest Block Id</TableCell>
-                            <TableCell align="right">
-                                Rendered Block Count
-                            </TableCell>
-                            <TableCell align="right">Status</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TaskList tasks={tasks} />
-                </Table>
-            </TableContainer>
-            <Button variant="contained" color="secondary">
-                STOP ALL
-            </Button>
-        </div>
+      <div>
+          <TableContainer component={Paper} style={{ marginTop: "5%" }}>
+              <Table className={classes.table} aria-label="simple table">
+                  <TableHead>
+                      <TableRow>
+                          <TableCell align="right">Job Id</TableCell>
+                          <TableCell align="right">Latest Block Id</TableCell>
+                          <TableCell align="right">
+                              Rendered Block Count
+                          </TableCell>
+                          <TableCell align="right">Status</TableCell>
+                      </TableRow>
+                  </TableHead>
+                  <TaskList tasks={tasks} />
+              </Table>
+          </TableContainer>
+          <Button variant="contained" color="secondary">
+              STOP ALL
+          </Button>
+      </div>
     );
 }
