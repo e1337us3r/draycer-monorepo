@@ -13,6 +13,7 @@ import CONFIG from "../config";
 import Worker from "../util/render.worker";
 import { RayTracer, SceneLoader, Editor, Color } from "draycer";
 import history from "./history";
+import { useRef } from "react";
 
 const useStyles = makeStyles({
     table: {
@@ -50,15 +51,17 @@ export default function Services() {
     const classes = useStyles();
     const [tasks, setTasks] = useState({});
     const socket = socketIOClient(CONFIG.serverSocketUrl);
+    const firstRender = useRef(true);
     useEffect(() => {
         const renderers = {};
-
+        console.log("here");
         socket.on("RENDER_BLOCK", async job => {
             let task = tasks[job.jobId];
 
             if (task) {
                 task.latestBlockId = job.blockId;
                 task.renderedBlockCount++;
+                setTasks({ ...tasks, ...task });
             } else {
                 task = {
                     jobId: job.jobId,
@@ -66,10 +69,9 @@ export default function Services() {
                     latestBlockId: job.blockId,
                     status: "rendering"
                 };
+                setTasks({ ...tasks, [job.jobId]: task });
             }
             console.log("1", tasks);
-
-            setTasks({ ...tasks, [job.jobId]: task });
 
             const {
                 yStart,
@@ -83,28 +85,32 @@ export default function Services() {
                 height
             } = job;
             let renderer = renderers[jobId];
-            if (renderer == undefined) {
+            if (firstRender.current === true && renderer === undefined) {
                 const parsedScene = await SceneLoader.load(scene);
-
+                console.log("rendere");
                 renderer = new RayTracer(parsedScene, width, height);
                 await renderer.loadTextures();
 
                 renderers[job.jobId] = renderer;
+                firstRender.current = false;
             }
 
             console.log("EVENT: RENDER_BLOCK | id= " + jobId);
 
             const renders = [];
 
-            for (let y = yStart; y < yEnd; y++) {
-                for (let x = xStart; x < xEnd; x++) {
-                    const color = renderer.tracedValueAtPixel(x, y);
-                    renders.push({
-                        coord: { x, y },
-                        color
-                    });
+            if (renderer) {
+                for (let y = yStart; y < yEnd; y++) {
+                    for (let x = xStart; x < xEnd; x++) {
+                        const color = renderer.tracedValueAtPixel(x, y);
+                        renders.push({
+                            coord: { x, y },
+                            color
+                        });
+                    }
                 }
             }
+
             socket.emit("BLOCK_RENDERED", {
                 jobId,
                 renders,
@@ -113,7 +119,6 @@ export default function Services() {
             console.log(
                 `EVENT: BLOCK_RENDERED | id= ${job.jobId}| blockId=${blockId}`
             );
-
             // worker.onmessage = ({data}) => {
             //     if (data.what === "BLOCK_RENDERED"){
             //
