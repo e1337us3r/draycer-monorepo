@@ -1,13 +1,13 @@
 import * as firebase from "firebase/app";
 import "firebase/auth";
 const firebaseConfig = {
-    apiKey: "AIzaSyATPMuXHan7SdBZZoMc7_MyBdJXcbF_sIk",
-    authDomain: "react-login-536eb.firebaseapp.com",
-    databaseURL: "https://react-login-536eb.firebaseio.com",
-    projectId: "react-login-536eb",
-    storageBucket: "react-login-536eb.appspot.com",
-    messagingSenderId: "976046792585",
-    appId: "1:976046792585:web:8449cb58c4d76df7"
+  apiKey: "AIzaSyAKt1ZhBp31KUC--95aT9fZAUuu4t4AyfI",
+  authDomain: "draycer-a84cb.firebaseapp.com",
+  databaseURL: "https://draycer-a84cb.firebaseio.com",
+  projectId: "draycer-a84cb",
+  storageBucket: "draycer-a84cb.appspot.com",
+  messagingSenderId: "558700456978",
+  appId: "1:558700456978:web:f55145ca57aa4ae4727ccb",
 };
 // Initialize Firebase
 
