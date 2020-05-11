@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import firebase from "./auth/firebase";
-import history from "./history";
+import { useHistory } from "react-router-dom";
 import { Link } from "react-router-dom";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
@@ -15,7 +15,7 @@ const Register = () => {
   const [passwordError, setPasswordError] = useState(false);
   const [emailErrorHelper, setEmailErrorHelper] = useState("");
   const [passErrorHelper, setPassErrorHelper] = useState("");
-
+  const history = useHistory();
   const handleSubmit = async (e) => {
     if (email !== "" && password.length >= 6) {
       await firebase

@@ -1,6 +1,5 @@
 import React from "react";
-import { BrowserRouter, Route, Switch, withRouter } from "react-router-dom";
-import history from "./history";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
 import Login from "./Login";
 import Register from "./Register";
 import Editor from "./EditorUI";
@@ -10,44 +9,42 @@ import NavBar from "./NavBar";
 import ViewTasks from "./ViewTasks";
 import Services from "./Services";
 import ViewTask from "./ViewTask";
-
-const App = () => {
+import AuthedRoute from "./auth/AuthedRoute";
+import AuthProvider from "./auth/Auth";
+function App() {
   return (
-    <BrowserRouter>
-      <Switch>
-        <Route path="/" exact component={Landing} />
-        <Route path="/login" exact>
-          <NavBar />
-          <Login />
-        </Route>
-        <Route path="/register">
-          <NavBar />
-          <Register />
-        </Route>
-
-        <Route path="/console">
-          <NavBar />
-          <ConsoleLanding />
-        </Route>
-        <Route path="/editor">
-          <NavBar />
-          <Editor />
-        </Route>
-        <Route path="/tasks">
-          <NavBar />
-          <ViewTasks />
-        </Route>
-        <Route path="/services">
-          <NavBar />
-          <Services />
-        </Route>
-        <Route path="/task/:id">
-          <NavBar />
-          <ViewTask />
-        </Route>
-      </Switch>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <NavBar />
+        <Switch>
+          <Route path="/" exact component={Landing} />
+          <Route path="/login" exact>
+            <Login />
+          </Route>
+          <Route path="/register">
+            <Register />
+          </Route>
+          <AuthedRoute
+            exact
+            component={ConsoleLanding}
+            path="/console"
+          ></AuthedRoute>
+          <AuthedRoute exact component={Editor} path="/editor"></AuthedRoute>
+          <AuthedRoute exact component={ViewTasks} path="/tasks"></AuthedRoute>
+          <AuthedRoute
+            exact
+            component={Services}
+            path="/services"
+          ></AuthedRoute>
+          <AuthedRoute
+            exact
+            component={ViewTask}
+            path="/task/:id"
+          ></AuthedRoute>
+        </Switch>
+      </BrowserRouter>
+    </AuthProvider>
   );
-};
+}
 
 export default App;

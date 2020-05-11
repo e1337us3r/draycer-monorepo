@@ -6,7 +6,7 @@ import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
-import history from "./history";
+import { useHistory } from "react-router-dom";
 
 const Login = () => {
   const [email, setMail] = useState("");
@@ -15,7 +15,7 @@ const Login = () => {
   const [passwordError, setPasswordError] = useState(false);
   const [emailErrorHelper, setEmailErrorHelper] = useState("");
   const [passErrorHelper, setPassErrorHelper] = useState("");
-
+  const history = useHistory();
   const handleSubmit = async (e) => {
     if (email !== "" && password !== "") {
       await firebase
@@ -24,7 +24,7 @@ const Login = () => {
         .then((u) => console.log(u));
 
       if (firebase.auth().currentUser) {
-        history.push("/landing");
+        history.push("/console");
       }
     } else {
       if (email === "") {
