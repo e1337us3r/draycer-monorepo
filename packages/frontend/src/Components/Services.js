@@ -10,9 +10,8 @@ import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
 import socketIOClient from "socket.io-client";
 import CONFIG from "../config";
-import Worker from "../util/render.worker";
-import { RayTracer, SceneLoader, Editor, Color } from "draycer";
-import history from "./history";
+import { RayTracer, SceneLoader } from "draycer";
+import * as axios from "axios";
 
 const useStyles = makeStyles({
     table: {
@@ -22,7 +21,6 @@ const useStyles = makeStyles({
 
 function TaskList(props) {
     const tasks = Object.values(props.tasks);
-    console.log("2", tasks);
 
     return (
       <TableBody>
@@ -49,9 +47,10 @@ function TaskList(props) {
 export default function Services() {
     const classes = useStyles();
     const [tasks, setTasks] = useState({});
-    const socket = socketIOClient(CONFIG.serverSocketUrl);
     useEffect(() => {
+        const socket = socketIOClient(CONFIG.serverSocketUrl);
         const renderers = {};
+        console.log("SOCKET CONNECTED");
 
         socket.on("RENDER_BLOCK", async job => {
             let task = tasks[job.jobId];
@@ -67,23 +66,20 @@ export default function Services() {
                     status: "rendering"
                 };
             }
-            console.log("1", tasks);
 
             setTasks({ ...tasks, [job.jobId]: task });
 
             const {
-                yStart,
-                yEnd,
-                xEnd,
-                xStart,
+                block,
                 jobId,
                 blockId,
-                scene,
                 width,
                 height
             } = job;
             let renderer = renderers[jobId];
             if (renderer == undefined) {
+                const scene = (await axios.get(`${CONFIG.serverUrl}/scene/${jobId}`)).data.scene;
+
                 const parsedScene = await SceneLoader.load(scene);
 
                 renderer = new RayTracer(parsedScene, width, height);
@@ -92,17 +88,12 @@ export default function Services() {
                 renderers[job.jobId] = renderer;
             }
 
-            console.log("EVENT: RENDER_BLOCK | id= " + jobId);
-
             const renders = [];
 
-            for (let y = yStart; y < yEnd; y++) {
-                for (let x = xStart; x < xEnd; x++) {
+            for (let y = block[1]; y < block[3]; y++) {
+                for (let x = block[0]; x < block[2]; x++) {
                     const color = renderer.tracedValueAtPixel(x, y);
-                    renders.push({
-                        coord: { x, y },
-                        color
-                    });
+                    renders.push([x,y,color.r,color.g,color.b])
                 }
             }
             socket.emit("BLOCK_RENDERED", {
@@ -113,22 +104,12 @@ export default function Services() {
             console.log(
               `EVENT: BLOCK_RENDERED | id= ${job.jobId}| blockId=${blockId}`
             );
-
-            // worker.onmessage = ({data}) => {
-            //     if (data.what === "BLOCK_RENDERED"){
-            //
-            //     }
-            // };
-
-            // worker.postMessage({
-            //     what: "RENDER_BLOCK",
-            //     job
-            // })
         });
 
         return () => {
             socket.disconnect();
         };
+        // eslint-disable-next-line
     }, []);
 
     return (
