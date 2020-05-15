@@ -14,34 +14,30 @@ import { RayTracer, SceneLoader } from "draycer";
 import * as axios from "axios";
 
 const useStyles = makeStyles({
-    table: {
-        minWidth: 650
-    }
+  table: {
+    minWidth: 650,
+  },
 });
 
 function TaskList(props) {
     const tasks = Object.values(props.tasks);
 
-    return (
-      <TableBody>
-          {tasks.map((item, index) => {
-              return (
-                <TableRow key={item.jobId}>
-                    <TableCell align="right" component="th" scope="row">
-                        {item.jobId}
-                    </TableCell>
-                    <TableCell align="right">
-                        {item.latestBlockId}
-                    </TableCell>
-                    <TableCell align="right">
-                        {item.renderedBlockCount}
-                    </TableCell>
-                    <TableCell align="right">{item.status}</TableCell>
-                </TableRow>
-              );
-          })}
-      </TableBody>
-    );
+  return (
+    <TableBody>
+      {tasks.map((item, index) => {
+        return (
+          <TableRow key={item.jobId}>
+            <TableCell align="right" component="th" scope="row">
+              {item.jobId}
+            </TableCell>
+            <TableCell align="right">{item.latestBlockId}</TableCell>
+            <TableCell align="right">{item.renderedBlockCount}</TableCell>
+            <TableCell align="right">{item.status}</TableCell>
+          </TableRow>
+        );
+      })}
+    </TableBody>
+  );
 }
 
 export default function Services() {
@@ -52,22 +48,22 @@ export default function Services() {
         const renderers = {};
         console.log("SOCKET CONNECTED");
 
-        socket.on("RENDER_BLOCK", async job => {
-            let task = tasks[job.jobId];
+    socket.on("RENDER_BLOCK", async (job) => {
+      let task = tasks[job.jobId];
 
-            if (task) {
-                task.latestBlockId = job.blockId;
-                task.renderedBlockCount++;
-            } else {
-                task = {
-                    jobId: job.jobId,
-                    renderedBlockCount: 0,
-                    latestBlockId: job.blockId,
-                    status: "rendering"
-                };
-            }
+      if (task) {
+        task.latestBlockId = job.blockId;
+        task.renderedBlockCount++;
+      } else {
+        task = {
+          jobId: job.jobId,
+          renderedBlockCount: 0,
+          latestBlockId: job.blockId,
+          status: "rendering",
+        };
+      }
 
-            setTasks({ ...tasks, [job.jobId]: task });
+      setTasks({ ...tasks, [job.jobId]: task });
 
             const {
                 block,
@@ -112,26 +108,24 @@ export default function Services() {
         // eslint-disable-next-line
     }, []);
 
-    return (
-      <div>
-          <TableContainer component={Paper} style={{ marginTop: "5%" }}>
-              <Table className={classes.table} aria-label="simple table">
-                  <TableHead>
-                      <TableRow>
-                          <TableCell align="right">Job Id</TableCell>
-                          <TableCell align="right">Latest Block Id</TableCell>
-                          <TableCell align="right">
-                              Rendered Block Count
-                          </TableCell>
-                          <TableCell align="right">Status</TableCell>
-                      </TableRow>
-                  </TableHead>
-                  <TaskList tasks={tasks} />
-              </Table>
-          </TableContainer>
-          <Button variant="contained" color="secondary">
-              STOP ALL
-          </Button>
-      </div>
-    );
+  return (
+    <div>
+      <TableContainer component={Paper} style={{ marginTop: "5%" }}>
+        <Table className={classes.table} aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              <TableCell align="right">Job Id</TableCell>
+              <TableCell align="right">Latest Block Id</TableCell>
+              <TableCell align="right">Rendered Block Count</TableCell>
+              <TableCell align="right">Status</TableCell>
+            </TableRow>
+          </TableHead>
+          <TaskList tasks={tasks} />
+        </Table>
+      </TableContainer>
+      <Button variant="contained" color="secondary">
+        STOP ALL
+      </Button>
+    </div>
+  );
 }
