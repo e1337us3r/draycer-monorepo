@@ -191,13 +191,13 @@ export default class Editor {
           this.transformControls.setTranslationSnap(100);
           this.transformControls.setRotationSnap(ThreeMath.degToRad(15));
           break;
-        case 87: // W
+        case 84: // T
           this.transformControls.setMode("translate");
           break;
-        case 69: // E
+        case 82: // R
           this.transformControls.setMode("rotate");
           break;
-        case 82: // R
+        case 83: // S
           this.transformControls.setMode("scale");
           break;
         case 187:

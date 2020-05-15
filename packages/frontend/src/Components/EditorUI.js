@@ -254,13 +254,13 @@ const EditorUI = () => {
             Object Transform
           </P>
           <P>
-            <span style={{ color: "#f48fb1" }}>'W'</span> = Translate
+            <span style={{ color: "#f48fb1" }}>'T'</span> = Translate
           </P>
           <P>
-            <span style={{ color: "#f48fb1" }}>'E'</span> = Rotate
+            <span style={{ color: "#f48fb1" }}>'R'</span> = Rotate
           </P>
           <P>
-            <span style={{ color: "#f48fb1" }}>'R'</span> = Scale
+            <span style={{ color: "#f48fb1" }}>'S'</span> = Scale
           </P>
           <P>
             <span style={{ color: "#f48fb1" }}>'Del'</span> = Delete
