@@ -66,7 +66,12 @@ function TaskList(props) {
                       </TableCell>
                     ) : (
                       <TableCell align="right">
-                          <Button variant="contained" color="secondary">
+                          <Button
+                            onClick={() => {
+                              history.push(`/task/${item.id}`);
+                            }}
+                            variant="contained"
+                            color="secondary">
                               In Progress
                           </Button>
                       </TableCell>
