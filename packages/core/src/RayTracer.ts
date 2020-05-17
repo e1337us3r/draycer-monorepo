@@ -15,7 +15,7 @@ import { Utils } from "./index";
 import * as Jimp from "jimp";
 
 const MAX_BOUNCES = 3;
-const NUM_SAMPLES_PER_DIRECTION = 4;
+const NUM_SAMPLES_PER_DIRECTION = 2;
 const NUM_SAMPLES_PER_PIXEL =
   NUM_SAMPLES_PER_DIRECTION * NUM_SAMPLES_PER_DIRECTION;
 

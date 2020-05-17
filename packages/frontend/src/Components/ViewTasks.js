@@ -81,13 +81,14 @@ function TaskList(props) {
       {props.tasks.map((item, index) => {
         const endDate =
           item.ended_at !== null ? new Date(item.ended_at) : new Date();
-        const timePastMin =
-          endDate.getTime() / 60000 -
-          new Date(item.started_at).getTime() / 60000;
+        const timePastMin = item.started_at
+          ? endDate.getTime() / 60000 -
+            new Date(item.started_at).getTime() / 60000
+          : 0;
         let percentage = "";
         if (item.status === "rendering")
           percentage = (
-            (item.renderedPixelCount / item.pixelCount) *
+            (item.metadata.rendered_pixel_count / item.metadata.pixel_count) *
             100
           ).toFixed(1);
         return (
