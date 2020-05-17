@@ -11,6 +11,7 @@ import * as axios from "axios";
 import CONFIG from "../config";
 import { useHistory } from "react-router-dom";
 import Button from "@material-ui/core/Button";
+import { continueTask, pauseTask } from "../api/client";
 
 const useStyles = makeStyles({
   table: {
@@ -20,6 +21,61 @@ const useStyles = makeStyles({
 
 function TaskList(props) {
   const history = useHistory();
+
+  const resolveRenderStatus = (status, id) => {
+    switch (status) {
+      case "completed":
+        return (
+          <TableCell align="right">
+            <Button
+              onClick={() => {
+                history.push(`/task/${id}`);
+              }}
+              variant="contained"
+              color="primary"
+            >
+              View
+            </Button>
+          </TableCell>
+        );
+      case "rendering":
+        return (
+          <TableCell align="right">
+            <Button variant="contained" color="primary">
+              Rendering
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => pauseTask(id)}
+            ></Button>
+          </TableCell>
+        );
+      case "waiting_workers":
+        return (
+          <TableCell align="right">
+            <Button variant="contained" color="secondary">
+              Waiting workers
+            </Button>
+          </TableCell>
+        );
+      case "paused":
+        return (
+          <TableCell align="right">
+            <Button
+              onClick={() => continueTask(id)}
+              variant="contained"
+              color="secondary"
+            >
+              Continue
+            </Button>
+          </TableCell>
+        );
+
+      default:
+    }
+  };
+
   return (
     <TableBody>
       {props.tasks.map((item, index) => {
@@ -46,25 +102,7 @@ function TaskList(props) {
               {item.status.toUpperCase()}{" "}
               {item.status === "rendering" ? `${percentage}%` : ""}{" "}
             </TableCell>
-            {item.status === "completed" ? (
-              <TableCell align="right">
-                <Button
-                  onClick={() => {
-                    history.push(`/task/${item.id}`);
-                  }}
-                  variant="contained"
-                  color="primary"
-                >
-                  View
-                </Button>
-              </TableCell>
-            ) : (
-              <TableCell align="right">
-                <Button variant="contained" color="secondary">
-                  In Progress
-                </Button>
-              </TableCell>
-            )}
+            {resolveRenderStatus(item.status, item.id)}
           </TableRow>
         );
       })}
