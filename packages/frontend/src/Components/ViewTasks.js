@@ -19,6 +19,44 @@ const useStyles = makeStyles({
   },
 });
 
+export default function ViewTasks() {
+  const classes = useStyles();
+  const [tasks, setTasks] = useState([]);
+  const [err, setErr] = useState("");
+  useEffect(() => {
+    axios // send a request when component is mounted
+      .get(CONFIG.serverUrl + "/scene")
+      .then((res) => setTasks(res.data.results))
+      .catch((err) => setErr(err));
+    // request every 3 seconds after component is mounted
+    const fetchTasksInterval = setInterval(() => {
+      axios
+        .get(CONFIG.serverUrl + "/scene")
+        .then((res) => setTasks(res.data.results))
+        .catch((err) => setErr(err));
+    }, 3000);
+
+    return () => clearInterval(fetchTasksInterval);
+  }, []);
+  return (
+    <TableContainer component={Paper} style={{ marginTop: "5%" }}>
+      <Table className={classes.table} aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            <TableCell>ID</TableCell>
+            <TableCell align="right">Name</TableCell>
+            <TableCell align="right">Date</TableCell>
+            <TableCell align="right">Duration</TableCell>
+            <TableCell align="right">Status</TableCell>
+          </TableRow>
+        </TableHead>
+        <TaskList tasks={tasks} />
+        {err && <span>{err.message}</span>}
+      </Table>
+    </TableContainer>
+  );
+}
+
 function TaskList(props) {
   const history = useHistory();
 
@@ -108,43 +146,5 @@ function TaskList(props) {
         );
       })}
     </TableBody>
-  );
-}
-
-export default function ViewTasks() {
-  const classes = useStyles();
-  const [tasks, setTasks] = useState([]);
-  const [err, setErr] = useState("");
-  useEffect(() => {
-    axios // send a request when component is mounted
-      .get(CONFIG.serverUrl + "/scene")
-      .then((res) => setTasks(res.data.results))
-      .catch((err) => setErr(err));
-    // request every 3 seconds after component is mounted
-    const fetchTasksInterval = setInterval(() => {
-      axios
-        .get(CONFIG.serverUrl + "/scene")
-        .then((res) => setTasks(res.data.results))
-        .catch((err) => setErr(err));
-    }, 3000);
-
-    return () => clearInterval(fetchTasksInterval);
-  }, []);
-  return (
-    <TableContainer component={Paper} style={{ marginTop: "5%" }}>
-      <Table className={classes.table} aria-label="simple table">
-        <TableHead>
-          <TableRow>
-            <TableCell>ID</TableCell>
-            <TableCell align="right">Name</TableCell>
-            <TableCell align="right">Date</TableCell>
-            <TableCell align="right">Duration</TableCell>
-            <TableCell align="right">Status</TableCell>
-          </TableRow>
-        </TableHead>
-        <TaskList tasks={tasks} />
-        {err && <span>{err.message}</span>}
-      </Table>
-    </TableContainer>
   );
 }

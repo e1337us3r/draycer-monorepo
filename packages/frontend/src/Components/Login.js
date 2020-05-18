@@ -43,8 +43,7 @@ const Login = () => {
       <Card>
         <form onSubmit={handleSubmit}>
           <CardContent>
-            <h5>Welcome to DRaycer!</h5>
-
+            <h5>Login!</h5>
             <TextField
               label="Email"
               type="email"
@@ -71,12 +70,12 @@ const Login = () => {
             />
             <br />
           </CardContent>
-          <CardActions className="buttons">
-            <Button variant="contained" color="primary" onClick={handleSubmit}>
+          <CardActions style={{ display: 'flex', justifyContent: 'center' }} className="buttons">
+            <Button style={{ flex: '0 0 50%', alignSelf: 'center' }} variant="contained" color="primary" onClick={handleSubmit}>
               Login
             </Button>
             <Link to="/register">
-              <Button variant="contained" color="secondary">
+              <Button style={{ flex: '0 0 50%', alignSelf: 'center' }} variant="contained" color="secondary">
                 Register
               </Button>
             </Link>

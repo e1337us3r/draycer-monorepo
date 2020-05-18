@@ -38,10 +38,11 @@ const Register = () => {
   };
 
   return (
-    <div>
-      <Card className="card">
+    <div style={{ width: "250px", margin: "10% auto" }}>
+      <Card>
         <form onSubmit={handleSubmit}>
-          <CardContent className="cardContent">
+          <CardContent>
+            <h5>Register!</h5>
             <TextField
               id="email"
               label="Email"
@@ -70,7 +71,7 @@ const Register = () => {
             />
             <br />
           </CardContent>
-          <CardActions className="buttons">
+          <CardActions style={{ display: 'flex', justifyContent: 'center' }}>
             <Button variant="contained" color="primary" onClick={handleSubmit}>
               Register
             </Button>

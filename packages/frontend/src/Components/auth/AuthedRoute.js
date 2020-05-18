@@ -11,8 +11,8 @@ const AuthedRoute = ({ component: RouteComponent, ...rest }) => {
         currentUser ? (
           <RouteComponent {...routeProps} user={currentUser} />
         ) : (
-          <Redirect to={"/login"} />
-        )
+            <Redirect to={"/login"} />
+          )
       }
     />
   );
