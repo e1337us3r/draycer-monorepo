@@ -7,11 +7,11 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
-import * as axios from "axios";
-import CONFIG from "../config";
 import { useHistory } from "react-router-dom";
-import Button from "@material-ui/core/Button";
-import { continueTask, pauseTask } from "../api/client";
+import API from "../api/client";
+import IconButton from "@material-ui/core/IconButton";
+import { PlayArrow, Pause, Visibility } from "@material-ui/icons";
+import { green } from '@material-ui/core/colors';
 
 const useStyles = makeStyles({
   table: {
@@ -61,57 +61,42 @@ function TaskList(props) {
   const history = useHistory();
 
   const resolveRenderStatus = (status, id) => {
-    switch (status) {
-      case "completed":
-        return (
-          <TableCell align="right">
-            <Button
-              onClick={() => {
-                history.push(`/task/${id}`);
-              }}
-              variant="contained"
-              color="primary"
-            >
-              View
-            </Button>
-          </TableCell>
-        );
-      case "rendering":
-        return (
-          <TableCell align="right">
-            <Button variant="contained" color="primary">
-              Rendering
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={() => pauseTask(id)}
-            >Pause</Button>
-          </TableCell>
-        );
-      case "waiting_workers":
-        return (
-          <TableCell align="right">
-            <Button variant="contained" color="secondary">
-              Waiting workers
-            </Button>
-          </TableCell>
-        );
-      case "paused":
-        return (
-          <TableCell align="right">
-            <Button
-              onClick={() => continueTask(id)}
-              variant="contained"
-              color="secondary"
-            >
-              Continue
-            </Button>
-          </TableCell>
-        );
+    return (
+      <TableCell align="right">
 
-      default:
-    }
+        <IconButton
+          onClick={() => API.scene.continue(id)}
+          variant="contained"
+          hidden={status !== "paused"}
+          aria-label="Continue Render"
+        >
+          <PlayArrow
+            style={{ color: green[500] }} />
+        </IconButton>
+
+        <IconButton
+          variant="contained"
+          hidden={status !== "rendering"}
+          onClick={() => API.scene.pause(id)}
+          aria-label="Pause Render"
+        >
+          <Pause
+            color="error" />
+
+        </IconButton>
+
+        <IconButton
+          onClick={() => {
+            history.push(`/task/${id}`);
+          }}
+          variant="contained"
+          aria-label="View Render"
+        >
+          <Visibility
+            color="primary" />
+        </IconButton>
+      </TableCell>
+    );
   };
 
   return (
@@ -146,5 +131,41 @@ function TaskList(props) {
         );
       })}
     </TableBody>
+  );
+}
+
+export default function ViewTasks() {
+  const classes = useStyles();
+  const [tasks, setTasks] = useState([]);
+  const [err, setErr] = useState("");
+  useEffect(() => {// send a
+    API.scene.getAll()
+      .then((data) => setTasks(data.results))
+      .catch(error => { });
+    // request every 3 seconds after component is mounted
+    const fetchTasksInterval = setInterval(() => {
+      API.scene.getAll()
+        .then((data) => setTasks(data.results))
+        .catch((err) => setErr(err));
+    }, 3000);
+
+    return () => clearInterval(fetchTasksInterval);
+  }, []);
+  return (
+    <TableContainer component={Paper} style={{ marginTop: "5%" }}>
+      <Table className={classes.table} aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            <TableCell>ID</TableCell>
+            <TableCell align="right">Name</TableCell>
+            <TableCell align="right">Date</TableCell>
+            <TableCell align="right">Duration</TableCell>
+            <TableCell align="right">Status</TableCell>
+          </TableRow>
+        </TableHead>
+        <TaskList tasks={tasks} />
+        {err && <span>{err.message}</span>}
+      </Table>
+    </TableContainer>
   );
 }

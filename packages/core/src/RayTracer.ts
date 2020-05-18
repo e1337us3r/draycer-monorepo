@@ -201,9 +201,9 @@ export default class RayTracer {
         .sub(lightSource);
 
       const amountReflectedAtViewer = v.dot(r);
-      const specular = material.specular
+      const specular = new Color(1, 1, 1)
         .clone()
-        .multiplyScalar(Math.pow(amountReflectedAtViewer, material.opacity));
+        .multiplyScalar(Math.pow(amountReflectedAtViewer, material.shininess));
       color.add(specular);
     });
 
@@ -224,8 +224,14 @@ export default class RayTracer {
     const intersections = this.raycaster.intersectObjects(
       this.threeScene.children
     );
-
-    return intersections.length > 0 /** && intersections[0].distance <= 1**/;
+    if (intersections.length > 0) {
+      return (
+        intersections[0].point.distanceTo(point) <
+        light.position.distanceTo(point)
+      );
+    } else {
+      return false;
+    }
   }
 
   private rayForPixel(x: number, y: number): THREE.Ray {

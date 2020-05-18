@@ -1,31 +1,47 @@
-import config from "../config";
-import axios from 'axios'
+import * as axios from "axios";
+import CONFIG from "../config";
+import { auth } from "../Components/auth/firebase";
 
-export const getScene = async (id) => {
-
-  const response = await axios(`${config.serverUrl}/scene/${id}`)
-  return response.data
+const getConfig = async () => {
+  let token = "";
+  if (auth().currentUser)
+    token = await auth().currentUser.getIdToken();
+  return {
+    headers:
+      { authorization: `Bearer ${token}` }
+  }
 }
 
-export const pauseTask = async (id) => {
-  const response = await axios.post(`${config.serverUrl}/scene/${id}/pause`);
-  return response.status;
+const API = {
+  user: {
+    baseUrl: CONFIG.serverUrl + "/user",
+    getWorkRecords: async () => {
+      return (await axios.get(API.user.baseUrl + "/work_record", await getConfig())).data
+    }
+  },
+  scene: {
+    baseUrl: CONFIG.serverUrl + "/scene",
+    get: async (id) => {
+      return (await axios.get(API.scene.baseUrl + `/${id}`, await getConfig())).data
+    },
+    getAll: async () => {
+      return (await axios.get(API.scene.baseUrl, await getConfig())).data
+    },
+    create: async (scene) => {
+      return (await axios.post(API.scene.baseUrl, { scene }, await getConfig())).data
+    },
+    pause: async (id) => {
+      return (await axios.post(API.scene.baseUrl + `/${id}/pause`, {}, await getConfig())).status
+    },
+    continue: async (id) => {
+      return (await axios.post(API.scene.baseUrl + `/${id}/continue`, {}, await getConfig())).status
+    },
+    getWorkRecords: async (id) => {
+      return (await axios.get(API.scene.baseUrl + `/${id}/work_record`, await getConfig())).data
+    }
+  }
 };
 
-export const continueTask = async (id) => {
-  const response = await axios.post(`${config.serverUrl}/scene/${id}/continue`);
-  return response.status;
-};
-
-export const getWorkerRecord = async () => {
-  const response = await axios(`${config.serverUrl}/user/work_record`);
-
-  return response.data;
-}
 
 
-export const getSceneWorkRecord = async (id) => {
-  const response = await axios(`${config.serverUrl}/scene/${id}/work_record`)
-
-  return response.data;
-}
+export default API;

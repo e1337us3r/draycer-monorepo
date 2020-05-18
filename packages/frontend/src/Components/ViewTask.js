@@ -9,6 +9,7 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import { makeStyles } from "@material-ui/core/styles";
+import API from "../api/client";
 
 
 const useStyles = makeStyles({
@@ -25,8 +26,13 @@ export default function ViewTask() {
   const classes = useStyles();
 
   useEffect(() => {
-    getScene(id).then((data) => setRender(data.render))
     getSceneWorkRecord(id).then(data => setWorkerRecord(data.results))
+    API.scene.get(id).then(data => {
+      setRender(data.render)
+    });
+    API.scene.getWorkRecords(id).then(data => {
+      setWorkerRecord(data.results)
+    })
   }, [id]);
 
   return (
