@@ -114,7 +114,9 @@ const EditorUI = () => {
     const object = new SphereGeometry(1, 20, 20);
     const material = new MeshPhongMaterial({
       color: 0x00ff00,
-      reflectivity: 0.2,
+      reflectivity: 0,
+      refractionRatio: 1.5,
+      shininess: 500
     });
     setSelectedObject(material);
     const sphere = new Mesh(object, material);
@@ -127,7 +129,8 @@ const EditorUI = () => {
 
     const material = new MeshPhongMaterial({
       color: 0x00ff00,
-      reflectivity: 0.2,
+      reflectivity: 0,
+      shininess: 500
     });
     setSelectedObject(material);
     console.log(material);
