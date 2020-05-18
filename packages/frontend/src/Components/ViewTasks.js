@@ -48,7 +48,7 @@ function TaskList(props) {
               variant="contained"
               color="secondary"
               onClick={() => pauseTask(id)}
-            ></Button>
+            >Pause</Button>
           </TableCell>
         );
       case "waiting_workers":
@@ -83,7 +83,7 @@ function TaskList(props) {
           item.ended_at !== null ? new Date(item.ended_at) : new Date();
         const timePastMin = item.started_at
           ? endDate.getTime() / 60000 -
-            new Date(item.started_at).getTime() / 60000
+          new Date(item.started_at).getTime() / 60000
           : 0;
         let percentage = "";
         if (item.status === "rendering")
