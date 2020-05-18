@@ -11,7 +11,7 @@ import Button from "@material-ui/core/Button";
 import socketIOClient from "socket.io-client";
 import CONFIG from "../config";
 import { RayTracer, SceneLoader } from "draycer";
-import * as axios from "axios";
+import API from "../api/client";
 
 const useStyles = makeStyles({
   table: {
@@ -74,7 +74,7 @@ export default function Services() {
             } = job;
             let renderer = renderers[jobId];
             if (renderer == undefined) {
-                const scene = (await axios.get(`${CONFIG.serverUrl}/scene/${jobId}`)).data.scene;
+                const scene = (await API.scene.get(jobId)).scene;
 
                 const parsedScene = await SceneLoader.load(scene);
 

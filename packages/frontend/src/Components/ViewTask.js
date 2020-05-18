@@ -1,8 +1,7 @@
 import React, {useEffect, useState} from "react";
-import * as axios from "axios";
-import CONFIG from "../config";
 import {useParams} from "react-router-dom";
 import Paper from "@material-ui/core/Paper";
+import API from "../api/client";
 
 export default function ViewTask() {
 
@@ -10,9 +9,8 @@ export default function ViewTask() {
   const [render, setRender] = useState([]);
 
   useEffect(()=>{
-    axios.get(CONFIG.serverUrl + "/scene/" + id).then(res => {
-      console.log(res.data);
-      setRender(res.data.render)
+    API.scene.get(id).then(data => {
+      setRender(data.render)
     });
   }, [id]);
 

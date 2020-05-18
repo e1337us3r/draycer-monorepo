@@ -12,8 +12,6 @@ import {
   ConeGeometry,
   Vector2,
 } from "three";
-import axios from "axios";
-import CONFIG from "../config";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import Button from "@material-ui/core/Button";
 import { Paper, TextField, Popover } from "@material-ui/core";
@@ -25,6 +23,7 @@ import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import TextureIcon from "@material-ui/icons/Texture";
 import styled from "styled-components";
 import { SketchPicker } from "react-color";
+import API from "../api/client";
 const P = styled.p`
   color: #539ffe;
 `;
@@ -92,7 +91,7 @@ const EditorUI = () => {
     sceneJson.HEIGHT = HEIGHT;
 
     if (option > 0)
-      await axios.post(CONFIG.serverUrl + "/scene", { scene: sceneJson });
+      await API.scene.create(sceneJson);
 
     if (option === 1) history.push("/tasks");
     else {
@@ -113,10 +112,11 @@ const EditorUI = () => {
   const addSphere = () => {
     const object = new SphereGeometry(1, 20, 20);
     const material = new MeshPhongMaterial({
-      color: 0x00ff00,
+      color: 0x00FF00,
       reflectivity: 0,
       refractionRatio: 1.5,
-      shininess: 500
+      shininess: 100,
+      opacity: 1
     });
     setSelectedObject(material);
     const sphere = new Mesh(object, material);
@@ -130,10 +130,10 @@ const EditorUI = () => {
     const material = new MeshPhongMaterial({
       color: 0x00ff00,
       reflectivity: 0,
+      opacity: 1,
       shininess: 500
     });
     setSelectedObject(material);
-    console.log(material);
     const cube = new Mesh(object, material);
     cube.position.set(0, 0, 0);
     EDITOR.addObjectToScene(cube);
