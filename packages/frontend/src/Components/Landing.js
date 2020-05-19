@@ -6,7 +6,6 @@ import Paper from "@material-ui/core/Paper";
 import TeamMember from "./TeamMember";
 
 const Header = styled.div`
-  height: 20%;
   display: flex;
   flex-direction: row;
   justify-content: space-between;

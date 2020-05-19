@@ -14,7 +14,7 @@ import {
 } from "three";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import Button from "@material-ui/core/Button";
-import { Paper, TextField, Popover } from "@material-ui/core";
+import { Paper, TextField, Popover, Tooltip } from "@material-ui/core";
 import CropDinIcon from "@material-ui/icons/CropDin";
 import Brightness1Icon from "@material-ui/icons/Brightness1";
 import ChangeHistoryIcon from "@material-ui/icons/ChangeHistory";
@@ -368,23 +368,35 @@ const EditorUI = () => {
                 aria-label="contained primary button group"
                 style={{ maxHeight: "75px" }}
               >
-                <Button
-                  style={{ marginRight: "10px" }}
-                  hidden={showResult}
-                  onClick={() => renderScene(0)}
+                <Tooltip title="Render the scene from your browser" arrow>
+                  <Button
+                    style={{ marginRight: "10px" }}
+                    hidden={showResult}
+                    onClick={() => renderScene(0)}
+                  >
+                    Client Render
+                  </Button>
+                </Tooltip>
+                <Tooltip
+                  title="Render the scene on the distributed servers of DRaycer"
+                  arrow
                 >
-                  Client Render
-                </Button>
-                <Button
-                  style={{ marginRight: "10px" }}
-                  hidden={showResult}
-                  onClick={() => renderScene(1)}
+                  <Button
+                    style={{ marginRight: "10px" }}
+                    hidden={showResult}
+                    onClick={() => renderScene(1)}
+                  >
+                    Server Render
+                  </Button>
+                </Tooltip>
+                <Tooltip
+                  title="Render using both your browser and the DRaycer servers"
+                  arrow
                 >
-                  Server Render
-                </Button>
-                <Button hidden={showResult} onClick={() => renderScene(2)}>
-                  Client & Server Render
-                </Button>
+                  <Button hidden={showResult} onClick={() => renderScene(2)}>
+                    Client & Server Render
+                  </Button>
+                </Tooltip>
               </ButtonGroup>
             </div>
           </div>
