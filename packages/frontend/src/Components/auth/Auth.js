@@ -10,6 +10,12 @@ const AuthProvider = ({ children }) => {
     app.auth().onAuthStateChanged((user) => {
       setCurrentUser(user);
       user.getIdToken().then(token => API.token = token)
+      // Refresh auth token evey 10 mins
+      const refreshHandler = async () => {
+        API.token = await app.auth().currentUser.getIdToken(true);
+        setTimeout(refreshHandler, 10*60*1000)
+      }
+      refreshHandler();
     });
   }, []);
 
