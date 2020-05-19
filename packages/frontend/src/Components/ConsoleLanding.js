@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@material-ui/core";
+import { Button, Tooltip } from "@material-ui/core";
 const LandingPage = () => {
   return (
     <div
@@ -12,38 +12,50 @@ const LandingPage = () => {
       }}
     >
       <Link to="/editor">
-        <Button style={{ width: "100%" }} variant="contained" color="secondary">
-          New Task
-        </Button>
+        <Tooltip title="Create a new scene" arrow>
+          <Button
+            style={{ width: "100%" }}
+            variant="contained"
+            color="secondary"
+          >
+            New Task
+          </Button>
+        </Tooltip>
       </Link>
       <br />
       <Link to="/tasks">
-        <Button
-          style={{ width: "100%", marginTop: "10px" }}
-          variant="contained"
-          color="secondary"
-        >
-          View Tasks
-        </Button>
+        <Tooltip title="View your render tasks" arrow>
+          <Button
+            style={{ width: "100%", marginTop: "10px" }}
+            variant="contained"
+            color="secondary"
+          >
+            View Tasks
+          </Button>
+        </Tooltip>
       </Link>
       <br />
       <Link to="/services">
-        <Button
-          style={{ width: "100%", marginTop: "10px" }}
-          variant="contained"
-          color="secondary"
-        >
-          My Services
-        </Button>
+        <Tooltip title="Become a worker!" arrow>
+          <Button
+            style={{ width: "100%", marginTop: "10px" }}
+            variant="contained"
+            color="secondary"
+          >
+            My Services
+          </Button>
+        </Tooltip>
       </Link>
       <Link to="/work_record">
-        <Button
-          style={{ width: "100%", marginTop: "10px" }}
-          variant="contained"
-          color="secondary"
-        >
-          Work Record
-        </Button>
+        <Tooltip title="View your worker history" arrow>
+          <Button
+            style={{ width: "100%", marginTop: "10px" }}
+            variant="contained"
+            color="secondary"
+          >
+            Work Record
+          </Button>
+        </Tooltip>
       </Link>
     </div>
   );
