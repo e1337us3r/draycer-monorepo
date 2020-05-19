@@ -11,7 +11,7 @@ import { useHistory } from "react-router-dom";
 import API from "../api/client";
 import IconButton from "@material-ui/core/IconButton";
 import { PlayArrow, Pause, Visibility } from "@material-ui/icons";
-import { green } from '@material-ui/core/colors';
+import { green } from "@material-ui/core/colors";
 
 const useStyles = makeStyles({
   table: {
@@ -23,13 +23,16 @@ export default function ViewTasks() {
   const classes = useStyles();
   const [tasks, setTasks] = useState([]);
   const [err, setErr] = useState("");
-  useEffect(() => {// send a
-    API.scene.getAll()
+  useEffect(() => {
+    // send a
+    API.scene
+      .getAll()
       .then((data) => setTasks(data.results))
-      .catch(error => { });
+      .catch((error) => {});
     // request every 3 seconds after component is mounted
     const fetchTasksInterval = setInterval(() => {
-      API.scene.getAll()
+      API.scene
+        .getAll()
         .then((data) => setTasks(data.results))
         .catch((err) => setErr(err));
     }, 3000);
@@ -37,21 +40,23 @@ export default function ViewTasks() {
     return () => clearInterval(fetchTasksInterval);
   }, []);
   return (
-    <TableContainer component={Paper} style={{ marginTop: "5%" }}>
-      <Table className={classes.table} aria-label="simple table">
-        <TableHead>
-          <TableRow>
-            <TableCell>ID</TableCell>
-            <TableCell align="right">Name</TableCell>
-            <TableCell align="right">Date</TableCell>
-            <TableCell align="right">Duration</TableCell>
-            <TableCell align="right">Status</TableCell>
-          </TableRow>
-        </TableHead>
-        <TaskList tasks={tasks} />
-        {err && <span>{err.message}</span>}
-      </Table>
-    </TableContainer>
+    <div style={{ marginTop: "3%", padding: "10px" }}>
+      <TableContainer component={Paper}>
+        <Table className={classes.table} aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              <TableCell>ID</TableCell>
+              <TableCell align="right">Name</TableCell>
+              <TableCell align="right">Date</TableCell>
+              <TableCell align="right">Duration</TableCell>
+              <TableCell align="right">Status</TableCell>
+            </TableRow>
+          </TableHead>
+          <TaskList tasks={tasks} />
+          {err && <span>{err.message}</span>}
+        </Table>
+      </TableContainer>
+    </div>
   );
 }
 
@@ -61,15 +66,13 @@ function TaskList(props) {
   const resolveRenderStatus = (status, id) => {
     return (
       <TableCell align="right">
-
         <IconButton
           onClick={() => API.scene.continue(id)}
           variant="contained"
           hidden={status !== "paused"}
           aria-label="Continue Render"
         >
-          <PlayArrow
-            style={{ color: green[500] }} />
+          <PlayArrow style={{ color: green[500] }} />
         </IconButton>
 
         <IconButton
@@ -78,9 +81,7 @@ function TaskList(props) {
           onClick={() => API.scene.pause(id)}
           aria-label="Pause Render"
         >
-          <Pause
-            color="error" />
-
+          <Pause color="error" />
         </IconButton>
 
         <IconButton
@@ -90,8 +91,7 @@ function TaskList(props) {
           variant="contained"
           aria-label="View Render"
         >
-          <Visibility
-            color="primary" />
+          <Visibility color="primary" />
         </IconButton>
       </TableCell>
     );
@@ -104,7 +104,7 @@ function TaskList(props) {
           item.ended_at !== null ? new Date(item.ended_at) : new Date();
         const timePastMin = item.started_at
           ? endDate.getTime() / 60000 -
-          new Date(item.started_at).getTime() / 60000
+            new Date(item.started_at).getTime() / 60000
           : 0;
         let percentage = "";
         if (item.status === "rendering")
@@ -131,5 +131,3 @@ function TaskList(props) {
     </TableBody>
   );
 }
-
-
