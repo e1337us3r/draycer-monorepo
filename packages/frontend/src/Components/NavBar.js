@@ -21,9 +21,10 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
   },
 }));
-export default function NavBar() {
+export default function NavBar(props) {
   const { currentUser } = useContext(AuthContext);
   const classes = useStyles();
+  console.log(props)
   return (
     <div>
       <AppBar position="static">
@@ -50,20 +51,22 @@ export default function NavBar() {
               onClick={() => {
                 firebase.auth().signOut();
               }}
+              variant="contained"
+              color="secondary"
             >
               Logout
             </Button>
           ) : (
-            <Link
-              to="/login"
-              style={{
-                color: "white",
-                textDecoration: "none",
-              }}
-            >
-              Login
-            </Link>
-          )}
+              <Link
+                to="/login"
+                style={{
+                  color: "white",
+                  textDecoration: "none",
+                }}
+              >
+                <Button variant="contained" color="primary">Login</Button>
+              </Link>
+            )}
         </Toolbar>
       </AppBar>
     </div>

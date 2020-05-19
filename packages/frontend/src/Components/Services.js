@@ -20,7 +20,7 @@ const useStyles = makeStyles({
 });
 
 function TaskList(props) {
-    const tasks = Object.values(props.tasks);
+  const tasks = Object.values(props.tasks);
 
   return (
     <TableBody>
@@ -41,12 +41,12 @@ function TaskList(props) {
 }
 
 export default function Services() {
-    const classes = useStyles();
-    const [tasks, setTasks] = useState({});
-    useEffect(() => {
-        const socket = socketIOClient(CONFIG.serverSocketUrl);
-        const renderers = {};
-        console.log("SOCKET CONNECTED");
+  const classes = useStyles();
+  const [tasks, setTasks] = useState({});
+  useEffect(() => {
+    const socket = socketIOClient(CONFIG.serverSocketUrl);
+    const renderers = {};
+    console.log("SOCKET CONNECTED");
 
     socket.on("RENDER_BLOCK", async (job) => {
       let task = tasks[job.jobId];
@@ -65,48 +65,48 @@ export default function Services() {
 
       setTasks({ ...tasks, [job.jobId]: task });
 
-            const {
-                block,
-                jobId,
-                blockId,
-                width,
-                height
-            } = job;
-            let renderer = renderers[jobId];
-            if (renderer == undefined) {
-                const scene = (await API.scene.get(jobId)).scene;
+      const {
+        block,
+        jobId,
+        blockId,
+        width,
+        height
+      } = job;
+      let renderer = renderers[jobId];
+      if (renderer == undefined) {
+        const scene = (await API.scene.get(jobId)).scene;
 
-                const parsedScene = await SceneLoader.load(scene);
+        const parsedScene = await SceneLoader.load(scene);
 
-                renderer = new RayTracer(parsedScene, width, height);
-                await renderer.loadTextures();
+        renderer = new RayTracer(parsedScene, width, height);
+        await renderer.loadTextures();
 
-                renderers[job.jobId] = renderer;
-            }
+        renderers[job.jobId] = renderer;
+      }
 
-            const renders = [];
+      const renders = [];
 
-            for (let y = block[1]; y < block[3]; y++) {
-                for (let x = block[0]; x < block[2]; x++) {
-                    const color = renderer.tracedValueAtPixel(x, y);
-                    renders.push([x,y,color.r,color.g,color.b])
-                }
-            }
-            socket.emit("BLOCK_RENDERED", {
-                jobId,
-                renders,
-                blockId
-            });
-            console.log(
-              `EVENT: BLOCK_RENDERED | id= ${job.jobId}| blockId=${blockId}`
-            );
-        });
+      for (let y = block[1]; y < block[3]; y++) {
+        for (let x = block[0]; x < block[2]; x++) {
+          const color = renderer.tracedValueAtPixel(x, y);
+          renders.push([x, y, color.r, color.g, color.b])
+        }
+      }
+      socket.emit("BLOCK_RENDERED", {
+        jobId,
+        renders,
+        blockId
+      });
+      console.log(
+        `EVENT: BLOCK_RENDERED | id= ${job.jobId}| blockId=${blockId}`
+      );
+    });
 
-        return () => {
-            socket.disconnect();
-        };
-        // eslint-disable-next-line
-    }, []);
+    return () => {
+      socket.disconnect();
+    };
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <div>

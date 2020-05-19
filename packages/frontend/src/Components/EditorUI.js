@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useHistory } from "react-router-dom";
 import { Editor, RayTracer, Image, SceneLoader } from "draycer";
 import {
@@ -176,14 +176,18 @@ const EditorUI = () => {
       EDITOR.setTextureSelected(URL.createObjectURL(event.target.files[0]));
   };
 
-  const setSelectedObjectColor = (color) => {
+  const modifySelectedObject = (color, reflectivity, specular) => {
     const ObjColor = new Color(color);
-
+    const ObjSpecular = new Color(specular);
+    console.log(ObjSpecular)
     if (
-      EDITOR.selectedObject &&
-      color !== EDITOR.selectedObject.material.color
+      EDITOR.selectedObject
     ) {
       EDITOR.selectedObject.material.color = ObjColor;
+      EDITOR.selectedObject.material.reflectivity = reflectivity
+      EDITOR.selectedObject.material.specular = ObjSpecular
+      console.log(EDITOR.selectedObject)
+
     }
   };
 
@@ -517,7 +521,7 @@ const EditorUI = () => {
         <Paper>
           {selectedObject && (
             <ObjectProperties
-              setColor={setSelectedObjectColor}
+              modifySelectedObject={modifySelectedObject}
               object={selectedObject}
             />
           )}
@@ -527,28 +531,30 @@ const EditorUI = () => {
   );
 };
 
-const ObjectProperties = ({ object = {}, setColor }) => {
+const ObjectProperties = ({ object = {}, modifySelectedObject }) => {
   const { map, color, reflectivity, refractionRatio, specular } = object;
   //   const properties = { map, color, reflectivity, refractionRatio, specular };
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl2, setAnchorEl2] = React.useState(null);
   const [ObjColor, setObjColor] = useState(color);
+  const [ObjSpecularColor, setObjSpecularColor] = useState(specular);
+  const [ObjReflectivity, setObjReflectivity] = useState(reflectivity);
 
-  const handleChangeComplete = (color, event) => {
+  const handleObjectColor = (color) => {
     setObjColor(color.hex);
   };
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const handleObjectSpecular = (color) => {
+    console.log(color)
+    setObjSpecularColor(color.hex);
+  }
 
-  useEffect(() => {
-    setColor(ObjColor);
-  }, [ObjColor, setColor]);
+  const submitProperties = useCallback((ObjColor, ObjReflectivity) => {
+    modifySelectedObject(ObjColor, ObjReflectivity, ObjSpecularColor);
+  }, [ObjColor, ObjReflectivity, ObjSpecularColor])
 
   const open = Boolean(anchorEl);
+  const open2 = Boolean(anchorEl2);
   return (
     <div
       style={{
@@ -562,56 +568,90 @@ const ObjectProperties = ({ object = {}, setColor }) => {
         <b>Object Details</b>
       </P>
       <div style={{ display: "flex", justifyContent: "space-evenly" }}>
-        <ul style={{ listStyleType: "none" }}>
-          <li key={color}>
-            Color:
-            <Button
-              style={{ marginLeft: "5px" }}
-              variant="contained"
-              onClick={handleClick}
-              size="small"
-              color="primary"
-            >
-              Select color
+
+        <form style={{ display: 'flex', flexDirection: 'column' }} onSubmit={(e) => { e.preventDefault(); submitProperties(ObjColor, ObjReflectivity) }}>
+          <Button
+            style={{ margin: "5px" }}
+            variant="contained"
+            onClick={(event) =>
+              setAnchorEl(event.currentTarget)
+            }
+            size="small"
+            color="secondary"
+          >
+            Select color
             </Button>
-            <Popover
-              open={open}
-              anchorEl={anchorEl}
-              onClose={handleClose}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "center",
-              }}
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "center",
-              }}
-            >
-              <SketchPicker
-                color={ObjColor}
-                onChangeComplete={handleChangeComplete}
-              />
-            </Popover>
-          </li>
-          <li key={reflectivity}>
-            Reflectivity:{" "}
-            <TextField
-              style={{ width: "10%", marginLeft: "5px" }}
-              size="small"
-              value={reflectivity}
+          <Popover
+            open={open}
+            anchorEl={anchorEl}
+            onClose={() =>
+              setAnchorEl(null)
+            }
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "center",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "center",
+            }}
+          >
+            <SketchPicker
+              color={ObjColor}
+              onChangeComplete={handleObjectColor}
             />
-          </li>
-          <li key={refractionRatio}>
-            Refraction ratio:{" "}
-            <TextField
-              style={{ width: "10%", marginLeft: "5px" }}
-              size="small"
-              value={refractionRatio}
+          </Popover>
+          <Button
+            style={{ margin: "5px" }}
+            variant="contained"
+            onClick={(event) => setAnchorEl2(event.currentTarget)}
+            size="small"
+            color="secondary"
+          >
+            Select specular color
+            </Button>
+          <Popover
+            open={open2}
+            anchorEl={anchorEl2}
+            onClose={() => setAnchorEl2(null)}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "center",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "center",
+            }}
+          >
+            <SketchPicker
+              color={ObjSpecularColor}
+              onChangeComplete={handleObjectSpecular}
             />
-          </li>
-        </ul>
-      </div>
-    </div>
+          </Popover>
+
+
+          <TextField
+            style={{ margin: "5px" }}
+
+            size="small"
+            label="Reflectivity"
+            type="number"
+            value={String(ObjReflectivity)}
+            onChange={(e) => setObjReflectivity(parseFloat(e.currentTarget.value))}
+          />
+
+          <TextField
+            style={{ margin: "5px" }}
+            label="Refraction"
+            type="number"
+            size="small"
+            value={refractionRatio}
+          />
+          <button style={{ margin: "5px" }}
+            type="submit">Save</button>
+        </form>
+      </div >
+    </div >
   );
 };
 

@@ -15,7 +15,6 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <NavBar />
         <Switch>
           <Route path="/" exact component={Landing} />
           <Route path="/login" exact>
@@ -24,23 +23,26 @@ function App() {
           <Route path="/register">
             <Register />
           </Route>
-          <AuthedRoute
-            exact
-            component={ConsoleLanding}
-            path="/console"
-          ></AuthedRoute>
-          <AuthedRoute exact component={Editor} path="/editor"></AuthedRoute>
-          <AuthedRoute exact component={ViewTasks} path="/tasks"></AuthedRoute>
-          <AuthedRoute
-            exact
-            component={Services}
-            path="/services"
-          ></AuthedRoute>
-          <AuthedRoute
-            exact
-            component={ViewTask}
-            path="/task/:id"
-          ></AuthedRoute>
+          <Route>
+            <NavBar />
+            <AuthedRoute
+              exact
+              component={ConsoleLanding}
+              path="/console"
+            ></AuthedRoute>
+            <AuthedRoute exact component={Editor} path="/editor"></AuthedRoute>
+            <AuthedRoute exact component={ViewTasks} path="/tasks"></AuthedRoute>
+            <AuthedRoute
+              exact
+              component={Services}
+              path="/services"
+            ></AuthedRoute>
+            <AuthedRoute
+              exact
+              component={ViewTask}
+              path="/task/:id"
+            ></AuthedRoute>
+          </Route>
         </Switch>
       </BrowserRouter>
     </AuthProvider>
