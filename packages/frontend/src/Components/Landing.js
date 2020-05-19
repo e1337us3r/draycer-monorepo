@@ -197,19 +197,19 @@ const Landing = () => {
                 contact="https://www.linkedin.com/in/onurozler/"
               />
               <TeamMember
-                name="Sinan"
-                image="/sinan.png"
-                about="Sinan is a full-stack developer responsible for the ray tracing algorithms and the backend of DRaycer."
-                contact="https://www.linkedin.com/in/sinansakaoglu/"
+                name="Sedat"
+                image="/sedat.png"
+                about="Sedat is a full-stack JS developer responsible for the front-end of DRaycer."
+                contact="https://www.linkedin.com/in/sedatcyalcin/"
               />
             </div>
 
             <div>
               <TeamMember
-                name="Sedat"
-                image="/sedat.png"
-                about="Sedat is a full-stack JS developer responsible for the front-end of DRaycer."
-                contact="https://www.linkedin.com/in/sedatcyalcin/"
+                name="Sinan"
+                image="/sinan.png"
+                about="Sinan is a full-stack developer responsible for the ray tracing algorithms and the backend of DRaycer."
+                contact="https://www.linkedin.com/in/sinansakaoglu/"
               />
               <TeamMember
                 name="Mert"
