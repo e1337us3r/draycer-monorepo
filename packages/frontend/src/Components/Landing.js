@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Container from "@material-ui/core/Container";
 import { useHistory } from "react-router-dom";
 import Paper from "@material-ui/core/Paper";
+import TeamMember from "./TeamMember";
 
 const Header = styled.div`
   height: 20%;
@@ -19,12 +20,13 @@ const NavList = styled.ul`
 `;
 
 const Link = styled.li`
-  margin-left: 15px;
+  margin-right: 15px;
   color: #ffffff;
   align-self: center;
 `;
 
 const Button = styled.button`
+  width: 100px;
   box-shadow: inset 0px 1px 0px 0px #ffffff;
   background: linear-gradient(to bottom, #ffffff 5%, #f6f6f6 100%);
   background-color: #ffffff;
@@ -41,7 +43,7 @@ const Button = styled.button`
   text-shadow: 0px 1px 0px #ffffff;
 
   :hover {
-    background: linear-gradient(to bottom, #f6f6f6 5%, #ffffff 100%);
+    background: linear-gradient(to bottom, #f6f6f6 5%, #ffffff 25%);
     background-color: #f6f6f6;
   }
   :active {
@@ -74,9 +76,7 @@ const Landing = () => {
                 Team
               </a>
             </Link>
-            <Link>
-              <Button onClick={() => history.push("/console")}>Console</Button>
-            </Link>
+            <Button onClick={() => history.push("/console")}>Console</Button>
           </NavList>
         </Header>
         <section>
@@ -86,6 +86,7 @@ const Landing = () => {
               display: "flex",
               justifyContent: "space-evenly",
               flexFlow: "row wrap",
+              marginTop: "15px",
             }}
           >
             <div
@@ -103,7 +104,11 @@ const Landing = () => {
                 of dollars.
               </p>
             </div>
-            <img style={{ flex: "0 0 70%" }} src="illust.svg" alt="" />
+            <img
+              style={{ flex: "0 0 70%", minWidth: "300px" }}
+              src="illust.svg"
+              alt=""
+            />
           </div>
         </section>
         <Paper
@@ -119,7 +124,6 @@ const Landing = () => {
             style={{
               display: "flex",
               flexDirection: "column",
-              flex: "0 0 50%",
             }}
           >
             <h3 style={{ textAlign: "center" }}>What is DRaycer?</h3>
@@ -135,15 +139,15 @@ const Landing = () => {
               across many computers.
             </Text>
             <Text>
-              DRaycer is the senior project of 4 students from CTIS of Bilkent
-              University, Turkey.
+              DRaycer is the senior project of 4 students from CTIS department
+              of Bilkent University, Turkey.
             </Text>
           </div>
           <div
             style={{
+              marginTop: "10px",
               display: "flex",
               flexDirection: "column",
-              flex: "0 0 50%",
             }}
           >
             <h3 style={{ textAlign: "center" }}>Features</h3>
@@ -167,7 +171,54 @@ const Landing = () => {
               quality of the render.
             </Text>
           </div>
-          <div style={{ display: "flex", flexDirection: "row" }}></div>
+        </Paper>
+        <Paper
+          id="team"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            margin: "25px auto",
+            padding: "20px",
+          }}
+        >
+          <h3 style={{ textAlign: "center" }}>Team</h3>
+          <div
+            style={{
+              display: "flex",
+              flexFlow: "row wrap",
+              justifyContent: "space-around",
+            }}
+          >
+            <div>
+              <TeamMember
+                name="Onur"
+                image="/onur.png"
+                about="Onur is a game developer responsible for the core ray tracing algorithms of DRaycer."
+                contact="https://www.linkedin.com/in/onurozler/"
+              />
+              <TeamMember
+                name="Sinan"
+                image="/sinan.png"
+                about="Sinan is a full-stack developer responsible for the ray tracing algorithms and the backend of DRaycer."
+                contact="https://www.linkedin.com/in/sinansakaoglu/"
+              />
+            </div>
+
+            <div>
+              <TeamMember
+                name="Sedat"
+                image="/sedat.png"
+                about="Sedat is a full-stack JS developer responsible for the front-end of DRaycer."
+                contact="https://www.linkedin.com/in/sedatcyalcin/"
+              />
+              <TeamMember
+                name="Mert"
+                image="/mert.png"
+                about="Mert is a mobile developer responsible for the product development and UI/UX of DRaycer"
+                contact="https://www.linkedin.com/in/mert-aydin/"
+              />
+            </div>
+          </div>
         </Paper>
       </Container>
     </div>
