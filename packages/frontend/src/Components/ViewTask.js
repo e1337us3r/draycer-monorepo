@@ -26,7 +26,6 @@ export default function ViewTask() {
   const classes = useStyles();
 
   useEffect(() => {
-    getSceneWorkRecord(id).then(data => setWorkerRecord(data.results))
     API.scene.get(id).then(data => {
       setRender(data.render)
     });
