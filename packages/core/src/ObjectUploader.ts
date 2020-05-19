@@ -15,8 +15,8 @@ export default class ObjectUploader {
     const object = objLoader.parse(path);
     object.position.set(0, 0, 0);
     const material = new MeshPhongMaterial({
-      color: 0x00ff00,
-      reflectivity: 1
+      color: 0x000000,
+      reflectivity: 0
     });
     (object.children[0] as Mesh).material = material;
     this.editor.addObjectToScene(object.children[0]);
