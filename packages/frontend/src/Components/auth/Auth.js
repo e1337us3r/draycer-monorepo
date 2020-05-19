@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import app from "./firebase";
+import API from "../../api/client";
 
 export const AuthContext = React.createContext();
 
@@ -8,6 +9,7 @@ const AuthProvider = ({ children }) => {
   useEffect(() => {
     app.auth().onAuthStateChanged((user) => {
       setCurrentUser(user);
+      user.getIdToken().then(token => API.token = token)
     });
   }, []);
 

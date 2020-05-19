@@ -1,18 +1,15 @@
 import * as axios from "axios";
 import CONFIG from "../config";
-import { auth } from "../Components/auth/firebase";
 
 const getConfig = async () => {
-  let token = "";
-  if (auth().currentUser)
-    token = await auth().currentUser.getIdToken();
   return {
     headers:
-      { authorization: `Bearer ${token}` }
+      { authorization: `Bearer ${API.token}` }
   }
 }
 
 const API = {
+  token: "",
   user: {
     baseUrl: CONFIG.serverUrl + "/user",
     getWorkRecords: async () => {

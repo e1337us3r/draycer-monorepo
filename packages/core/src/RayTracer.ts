@@ -145,6 +145,25 @@ export default class RayTracer {
 
     const normal = this.getNormalFromIntersection(intersection);
 
+    let diffuse = material.color;
+
+    if (material.map) {
+      const texture = this.textures[intersection.object.uuid];
+
+      const uv = intersection.uv;
+      material.map.transformUv(uv);
+      uv.setX(Math.round(texture.getWidth() * uv.x));
+      uv.setY(Math.round(texture.getHeight() * uv.y));
+
+      const PixelColor = texture.getPixelColor(uv.x, uv.y);
+      const PixelColorText = Jimp.intToRGBA(PixelColor);
+      diffuse = new Color(
+        PixelColorText.r / 255,
+        PixelColorText.g / 255,
+        PixelColorText.b / 255
+      );
+    }
+
     this.lights.forEach(light => {
       let lightSource: Vector3;
 
@@ -168,25 +187,6 @@ export default class RayTracer {
       );
       if (isShadowed) {
         return;
-      }
-
-      let diffuse = material.color;
-
-      if (material.map) {
-        const texture = this.textures[intersection.object.uuid];
-
-        const uv = intersection.uv;
-        material.map.transformUv(uv);
-        uv.setX(Math.round(texture.getWidth() * uv.x));
-        uv.setY(Math.round(texture.getHeight() * uv.y));
-
-        const PixelColor = texture.getPixelColor(uv.x, uv.y);
-        const PixelColorText = Jimp.intToRGBA(PixelColor);
-        diffuse = new Color(
-          PixelColorText.r / 255,
-          PixelColorText.g / 255,
-          PixelColorText.b / 255
-        );
       }
 
       diffuse = diffuse
