@@ -60,10 +60,7 @@ const EditorUI = () => {
           mouse.x = (clientX / editorCanvas.clientWidth) * 2 - 1;
           mouse.y = -(clientY / editorCanvas.clientHeight) * 2 + 1;
           EDITOR.selectObjects(mouse);
-          if (editorRendered.current && EDITOR?.selectedObject) {
-            setSelectedObject(EDITOR.selectedObject.material);
-            console.log("test", EDITOR.selectedObject);
-          }
+          setSelectedObject(EDITOR.selectedObject);
         },
         false
       );
@@ -90,8 +87,7 @@ const EditorUI = () => {
     sceneJson.WIDTH = WIDTH;
     sceneJson.HEIGHT = HEIGHT;
 
-    if (option > 0)
-      await API.scene.create(sceneJson);
+    if (option > 0) await API.scene.create(sceneJson);
 
     if (option === 1) history.push("/tasks");
     else {
@@ -112,14 +108,14 @@ const EditorUI = () => {
   const addSphere = () => {
     const object = new SphereGeometry(1, 20, 20);
     const material = new MeshPhongMaterial({
-      color: 0x00FF00,
+      color: 0x00ff00,
       reflectivity: 0,
       refractionRatio: 1.5,
       shininess: 100,
-      opacity: 1
+      opacity: 1,
     });
-    setSelectedObject(material);
     const sphere = new Mesh(object, material);
+    setSelectedObject(sphere);
     sphere.position.set(0, 0, 0);
     EDITOR.addObjectToScene(sphere);
   };
@@ -131,7 +127,7 @@ const EditorUI = () => {
       color: 0x00ff00,
       reflectivity: 0,
       opacity: 1,
-      shininess: 500
+      shininess: 500,
     });
     setSelectedObject(material);
     const cube = new Mesh(object, material);
@@ -176,20 +172,25 @@ const EditorUI = () => {
       EDITOR.setTextureSelected(URL.createObjectURL(event.target.files[0]));
   };
 
-  const modifySelectedObject = (color, reflectivity, specular) => {
-    const ObjColor = new Color(color);
-    const ObjSpecular = new Color(specular);
-    console.log(ObjSpecular)
-    if (
-      EDITOR.selectedObject
-    ) {
-      EDITOR.selectedObject.material.color = ObjColor;
-      EDITOR.selectedObject.material.reflectivity = reflectivity
-      EDITOR.selectedObject.material.specular = ObjSpecular
-      console.log(EDITOR.selectedObject)
-
-    }
-  };
+  // const modifySelectedObject = (
+  //   color,
+  //   reflectivity,
+  //   specular,
+  //   shininess,
+  //   refractionRatio
+  // ) => {
+  //   const ObjColor = new Color(color);
+  //   const ObjSpecular = new Color(specular);
+  //   console.log(ObjSpecular);
+  //   if (EDITOR.selectedObject) {
+  //     EDITOR.selectedObject.material.color = ObjColor;
+  //     EDITOR.selectedObject.material.reflectivity = reflectivity;
+  //     EDITOR.selectedObject.material.specular = ObjSpecular;
+  //     EDITOR.selectedObject.material.shininess = shininess;
+  //     EDITOR.selectedObject.material.refractionRatio = refractionRatio;
+  //     console.log(EDITOR.selectedObject);
+  //   }
+  // };
 
   const uploadScene = (event) => {
     if (event.target.files[0]) {
@@ -211,7 +212,7 @@ const EditorUI = () => {
     }
   };
 
-  const clickSaveScene = (event) => {
+  const clickSaveScene = () => {
     const fileData = JSON.stringify(EDITOR.getRenderingScene().toJSON()); // convert function outp to json string
     const blob = new Blob([fileData], { type: "text/plain" }); // create the object file type
     const url = URL.createObjectURL(blob); // bunu daha once kullanmistik zaten
@@ -521,8 +522,8 @@ const EditorUI = () => {
         <Paper>
           {selectedObject && (
             <ObjectProperties
-              modifySelectedObject={modifySelectedObject}
-              object={selectedObject}
+              selectedObject={selectedObject}
+              setSelectedObject={setSelectedObject}
             />
           )}
         </Paper>
@@ -531,27 +532,81 @@ const EditorUI = () => {
   );
 };
 
-const ObjectProperties = ({ object = {}, modifySelectedObject }) => {
-  const { map, color, reflectivity, refractionRatio, specular } = object;
+const ObjectProperties = ({ selectedObject, setSelectedObject }) => {
+  const {
+    shininess,
+    color,
+    reflectivity,
+    refractionRatio,
+    specular,
+  } = selectedObject;
   //   const properties = { map, color, reflectivity, refractionRatio, specular };
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [anchorEl2, setAnchorEl2] = React.useState(null);
   const [ObjColor, setObjColor] = useState(color);
+  const [ObjRefraction, setObjRefraction] = useState(refractionRatio);
   const [ObjSpecularColor, setObjSpecularColor] = useState(specular);
   const [ObjReflectivity, setObjReflectivity] = useState(reflectivity);
+  const [ObjShininess, setObjShininess] = useState(shininess);
+
+  console.log("here", selectedObject);
+
+  useEffect(() => {
+    if (selectedObject && selectedObject.material) {
+      setObjColor(selectedObject.material.color);
+      setObjRefraction(selectedObject.material.refractionRatio);
+      setObjSpecularColor(selectedObject.material.specular);
+      setObjReflectivity(selectedObject.material.reflectivity);
+      setObjShininess(selectedObject.material.shininess);
+    }
+  }, [selectedObject]);
 
   const handleObjectColor = (color) => {
     setObjColor(color.hex);
   };
 
   const handleObjectSpecular = (color) => {
-    console.log(color)
     setObjSpecularColor(color.hex);
-  }
+  };
 
-  const submitProperties = useCallback((ObjColor, ObjReflectivity) => {
-    modifySelectedObject(ObjColor, ObjReflectivity, ObjSpecularColor);
-  }, [ObjColor, ObjReflectivity, ObjSpecularColor])
+  const submitProperties = useCallback(() => {
+    const modifySelectedObject = (
+      color,
+      reflectivity,
+      specular,
+      shininess,
+      refractionRatio
+    ) => {
+      const ObjColor = new Color(color);
+      const ObjSpecular = new Color(specular);
+      console.log(ObjSpecular);
+      if (selectedObject) {
+        let temp = selectedObject;
+        temp.material.color = ObjColor;
+        temp.material.reflectivity = Number(reflectivity);
+        temp.material.specular = ObjSpecular;
+        temp.material.shininess = Number(shininess);
+        temp.material.refractionRatio = Number(refractionRatio);
+        setSelectedObject(temp);
+        console.log(selectedObject);
+      }
+    };
+    modifySelectedObject(
+      ObjColor,
+      ObjReflectivity,
+      ObjSpecularColor,
+      ObjShininess,
+      ObjRefraction
+    );
+  }, [
+    ObjColor,
+    ObjReflectivity,
+    ObjSpecularColor,
+    ObjShininess,
+    ObjRefraction,
+    selectedObject,
+    setSelectedObject,
+  ]);
 
   const open = Boolean(anchorEl);
   const open2 = Boolean(anchorEl2);
@@ -568,25 +623,26 @@ const ObjectProperties = ({ object = {}, modifySelectedObject }) => {
         <b>Object Details</b>
       </P>
       <div style={{ display: "flex", justifyContent: "space-evenly" }}>
-
-        <form style={{ display: 'flex', flexDirection: 'column' }} onSubmit={(e) => { e.preventDefault(); submitProperties(ObjColor, ObjReflectivity) }}>
+        <form
+          style={{ display: "flex", flexDirection: "column" }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            submitProperties();
+          }}
+        >
           <Button
             style={{ margin: "5px" }}
             variant="contained"
-            onClick={(event) =>
-              setAnchorEl(event.currentTarget)
-            }
+            onClick={(event) => setAnchorEl(event.currentTarget)}
             size="small"
             color="secondary"
           >
             Select color
-            </Button>
+          </Button>
           <Popover
             open={open}
             anchorEl={anchorEl}
-            onClose={() =>
-              setAnchorEl(null)
-            }
+            onClose={() => setAnchorEl(null)}
             anchorOrigin={{
               vertical: "bottom",
               horizontal: "center",
@@ -609,7 +665,7 @@ const ObjectProperties = ({ object = {}, modifySelectedObject }) => {
             color="secondary"
           >
             Select specular color
-            </Button>
+          </Button>
           <Popover
             open={open2}
             anchorEl={anchorEl2}
@@ -629,29 +685,36 @@ const ObjectProperties = ({ object = {}, modifySelectedObject }) => {
             />
           </Popover>
 
-
           <TextField
             style={{ margin: "5px" }}
-
             size="small"
             label="Reflectivity"
             type="number"
-            value={String(ObjReflectivity)}
-            onChange={(e) => setObjReflectivity(parseFloat(e.currentTarget.value))}
+            value={ObjReflectivity}
+            onChange={(e) => setObjReflectivity(e.currentTarget.value)}
           />
-
+          <TextField
+            style={{ margin: "5px" }}
+            label="Shininess"
+            type="number"
+            size="small"
+            value={ObjShininess}
+            onChange={(e) => setObjShininess(e.currentTarget.value)}
+          />
           <TextField
             style={{ margin: "5px" }}
             label="Refraction"
             type="number"
             size="small"
-            value={refractionRatio}
+            value={ObjRefraction}
+            onChange={(e) => setObjRefraction(e.currentTarget.value)}
           />
-          <button style={{ margin: "5px" }}
-            type="submit">Save</button>
+          <button style={{ margin: "5px" }} type="submit">
+            Save
+          </button>
         </form>
-      </div >
-    </div >
+      </div>
+    </div>
   );
 };
 
