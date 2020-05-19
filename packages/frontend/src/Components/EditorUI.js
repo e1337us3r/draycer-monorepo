@@ -129,8 +129,8 @@ const EditorUI = () => {
       opacity: 1,
       shininess: 500,
     });
-    setSelectedObject(material);
     const cube = new Mesh(object, material);
+    setSelectedObject(cube);
     cube.position.set(0, 0, 0);
     EDITOR.addObjectToScene(cube);
   };
@@ -142,8 +142,8 @@ const EditorUI = () => {
       color: 0x00ff00,
       reflectivity: 0.2,
     });
-    setSelectedObject(material);
     const pyramid = new Mesh(object, material);
+    setSelectedObject(pyramid);
     pyramid.position.set(0, 0, 0);
     EDITOR.addObjectToScene(pyramid);
   };
@@ -689,6 +689,13 @@ const ObjectProperties = ({ selectedObject, setSelectedObject }) => {
             style={{ margin: "5px" }}
             size="small"
             label="Reflectivity"
+            InputProps={{
+              inputProps: {
+                max: 1,
+                min: 0.0,
+                step: 0.01,
+              },
+            }}
             type="number"
             value={ObjReflectivity}
             onChange={(e) => setObjReflectivity(e.currentTarget.value)}
@@ -697,6 +704,12 @@ const ObjectProperties = ({ selectedObject, setSelectedObject }) => {
             style={{ margin: "5px" }}
             label="Shininess"
             type="number"
+            InputProps={{
+              inputProps: {
+                max: 1000,
+                min: 0,
+              },
+            }}
             size="small"
             value={ObjShininess}
             onChange={(e) => setObjShininess(e.currentTarget.value)}
@@ -705,6 +718,13 @@ const ObjectProperties = ({ selectedObject, setSelectedObject }) => {
             style={{ margin: "5px" }}
             label="Refraction"
             type="number"
+            InputProps={{
+              inputProps: {
+                max: 1,
+                min: 0.0,
+                step: 0.01,
+              },
+            }}
             size="small"
             value={ObjRefraction}
             onChange={(e) => setObjRefraction(e.currentTarget.value)}
