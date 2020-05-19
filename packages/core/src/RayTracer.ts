@@ -136,6 +136,7 @@ export default class RayTracer {
     const color = new Color(0, 0, 0);
     const material = (intersection.object as THREE.Mesh)
       .material as THREE.MeshPhongMaterial;
+    // Console.log(material.shininess);
 
     const v = this.camera.position
       .clone()
@@ -204,7 +205,9 @@ export default class RayTracer {
       const amountReflectedAtViewer = v.dot(r);
       const specular = new Color(1, 1, 1)
         .clone()
-        .multiplyScalar(Math.pow(amountReflectedAtViewer, material.shininess));
+        .multiplyScalar(
+          Math.pow(amountReflectedAtViewer, 1000 - material.shininess)
+        );
       color.add(specular);
     });
 
