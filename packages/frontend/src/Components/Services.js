@@ -109,8 +109,8 @@ export default function Services() {
   }, []);
 
   return (
-    <div>
-      <TableContainer component={Paper} style={{ marginTop: "5%" }}>
+    <div style={{ marginTop: "3%", padding: '10px' }}>
+      <TableContainer component={Paper} >
         <Table className={classes.table} aria-label="simple table">
           <TableHead>
             <TableRow>
@@ -123,7 +123,7 @@ export default function Services() {
           <TaskList tasks={tasks} />
         </Table>
       </TableContainer>
-      <Button variant="contained" color="secondary">
+      <Button style={{ marginTop: '5px' }} variant="contained" color="secondary">
         STOP ALL
       </Button>
     </div>

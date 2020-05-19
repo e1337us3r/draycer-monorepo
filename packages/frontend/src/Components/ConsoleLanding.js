@@ -36,6 +36,15 @@ const LandingPage = () => {
           My Services
         </Button>
       </Link>
+      <Link to="/work_record">
+        <Button
+          style={{ width: "100%", marginTop: "10px" }}
+          variant="contained"
+          color="secondary"
+        >
+          Work Record
+        </Button>
+      </Link>
     </div>
   );
 };

@@ -11,6 +11,7 @@ import Services from "./Services";
 import ViewTask from "./ViewTask";
 import AuthedRoute from "./auth/AuthedRoute";
 import AuthProvider from "./auth/Auth";
+import UserWorkRecord from "./UserWorkRecord";
 function App() {
   return (
     <AuthProvider>
@@ -32,6 +33,7 @@ function App() {
             ></AuthedRoute>
             <AuthedRoute exact component={Editor} path="/editor"></AuthedRoute>
             <AuthedRoute exact component={ViewTasks} path="/tasks"></AuthedRoute>
+            <AuthedRoute exact component={UserWorkRecord} path="/work_record"></AuthedRoute>
             <AuthedRoute
               exact
               component={Services}

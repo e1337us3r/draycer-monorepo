@@ -35,7 +35,7 @@ export default function ViewTask() {
   }, [id]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'row wrap' }} elevation={3}>
+    <div style={{ display: 'flex', flexDirection: 'row wrap', padding: '10px' }} elevation={3}>
       <img style={{ flex: '0 0 50%' }} src={render} alt="" />
       <TableContainer component={Paper}>
         <Table className={classes.table} aria-label="simple table">
