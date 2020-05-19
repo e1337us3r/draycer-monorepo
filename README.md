@@ -16,6 +16,8 @@ If there are any changes to the serverUrl and serverSocketUrl variables on the D
 
 Depending on your package manager (DRaycer uses yarn), install the dependencies required on different package.json files found inside the application.
 
+Important: Use node version 12
+
 Run
 
 ```
