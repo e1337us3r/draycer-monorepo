@@ -113,20 +113,42 @@ export default class RayTracer {
         .multiplyScalar(2)
         .multiplyScalar(normal.dot(v))
         .sub(v);
-      const reflectionRay = new THREE.Ray(
-        intersection.point.clone().add(normal.clone().multiplyScalar(0.01)),
-        r
-      );
 
-      const reflected = this.tracedValueForRay(reflectionRay, depth - 1);
-      color.add(
-        reflected
-          .clone()
-          .multiplyScalar(
-            ((intersection.object as THREE.Mesh)
-              .material as THREE.MeshPhongMaterial).reflectivity
-          )
+      const material = ((intersection.object as THREE.Mesh)
+          .material as THREE.MeshPhongMaterial);
+
+
+      const reflectionRay = new THREE.Ray(
+          intersection.point.clone().add(normal.clone().multiplyScalar(0.01)),
+          r
       );
+      const reflected = this.tracedValueForRay(reflectionRay, depth - 1);
+
+      if (material.opacity < 1)
+      {
+        const refractionDirection = this.refractRay(ray.direction.clone(), normal.clone(),material.refractionRatio).normalize();
+        const refractionOrigin = refractionDirection.clone().dot(normal) < 0 ? intersection.point.clone().sub(normal.clone().multiplyScalar(0.001)) :
+            intersection.point.clone().add(normal.clone().multiplyScalar(0.001));
+
+        const refractionRay = new THREE.Ray(refractionOrigin, refractionDirection);
+
+        const refractColor = this.tracedValueForRay(refractionRay, depth - 1);
+        color.add(
+            reflected
+                .clone()
+                .multiplyScalar(material.reflectivity).add(refractColor)
+        );
+      }
+
+      else {
+        color.add(
+            reflected
+                .clone()
+                .multiplyScalar(material.reflectivity)
+        );
+      }
+      
+      
     }
 
     return color;
@@ -286,6 +308,51 @@ export default class RayTracer {
 
     return imagePlane;
   }
+  
+  private refractRay(I : Vector3, N: Vector3, eta_t: number): Vector3{
+    let cosi = - Math.max(-1, Math.min(1,I.dot(N)));
+    let etat = eta_t;
+    let etai =  1;
+    if (cosi < 0 )
+    {
+      etat = 1;
+      etai = eta_t;
+      N.negate();
+    }
+    let eta = etai / etat;
+    const k = 1 - eta * eta * (1 - cosi * cosi);
+    return k < 0 ? new Vector3(1,0,0 ) : I.multiplyScalar(eta).add(N.multiplyScalar((eta * cosi - Math.sqrt(k))));
+  }
+  /*
+  private fresnel(I : Vector3, N: Vector3, eta_t: number): number{
+    let kr;
+    let cosi = Math.max(-1, I.dot(N), 1);
+    let etat = eta_t;
+    let etai =  1;
+    if (cosi < 0 )
+    {
+      etat = 1;
+      etai = eta_t;
+      N.negate();
+    }
+    let eta = etai / etat;
+    let k = 1 - eta * eta * (1 - cosi * cosi);
+    if (k >= 1)
+    {
+      kr = 1;
+    }
+    else
+    {
+      let cost = Math.sqrt(Math.max(0,1 - k * k));
+      cost = Math.abs(cost);
+      const Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
+      const Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
+      kr = (Rs * Rs + Rp * Rp) / 2;
+
+    }
+    
+    return kr;
+  }*/
 
   private getNormalFromIntersection(intersection: Intersection): Vector3 {
     const mesh = intersection.object as Mesh;

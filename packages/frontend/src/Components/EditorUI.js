@@ -112,7 +112,7 @@ const EditorUI = () => {
       reflectivity: 0,
       refractionRatio: 1.5,
       shininess: 100,
-      opacity: 1,
+      opacity: 0.5,
     });
     const sphere = new Mesh(object, material);
     setSelectedObject(sphere);
