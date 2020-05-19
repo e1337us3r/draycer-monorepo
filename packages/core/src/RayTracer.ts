@@ -191,7 +191,8 @@ export default class RayTracer {
       diffuse = diffuse
         .clone()
         .multiply(light.color)
-        .multiplyScalar(lightInNormalDirection);
+        .multiplyScalar(lightInNormalDirection).
+        .multiplyScalar(material.opacity);
       color.add(diffuse);
 
       const r = normal
