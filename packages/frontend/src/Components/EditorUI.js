@@ -112,7 +112,7 @@ const EditorUI = () => {
       reflectivity: 0,
       refractionRatio: 1.5,
       shininess: 100,
-      opacity: 0.5,
+      opacity: 0,
     });
     const sphere = new Mesh(object, material);
     setSelectedObject(sphere);
@@ -171,26 +171,6 @@ const EditorUI = () => {
     if (event.target.files[0])
       EDITOR.setTextureSelected(URL.createObjectURL(event.target.files[0]));
   };
-
-  // const modifySelectedObject = (
-  //   color,
-  //   reflectivity,
-  //   specular,
-  //   shininess,
-  //   refractionRatio
-  // ) => {
-  //   const ObjColor = new Color(color);
-  //   const ObjSpecular = new Color(specular);
-  //   console.log(ObjSpecular);
-  //   if (EDITOR.selectedObject) {
-  //     EDITOR.selectedObject.material.color = ObjColor;
-  //     EDITOR.selectedObject.material.reflectivity = reflectivity;
-  //     EDITOR.selectedObject.material.specular = ObjSpecular;
-  //     EDITOR.selectedObject.material.shininess = shininess;
-  //     EDITOR.selectedObject.material.refractionRatio = refractionRatio;
-  //     console.log(EDITOR.selectedObject);
-  //   }
-  // };
 
   const uploadScene = (event) => {
     if (event.target.files[0]) {
@@ -550,26 +530,23 @@ const ObjectProperties = ({ selectedObject, setSelectedObject }) => {
     color,
     reflectivity,
     refractionRatio,
-    specular,
+    opacity
   } = selectedObject;
-  //   const properties = { map, color, reflectivity, refractionRatio, specular };
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [anchorEl2, setAnchorEl2] = React.useState(null);
   const [ObjColor, setObjColor] = useState(color);
   const [ObjRefraction, setObjRefraction] = useState(refractionRatio);
-  const [ObjSpecularColor, setObjSpecularColor] = useState(specular);
   const [ObjReflectivity, setObjReflectivity] = useState(reflectivity);
   const [ObjShininess, setObjShininess] = useState(shininess);
-
-  console.log("here", selectedObject);
+  const [ObjOpacity, setObjOpacity] = useState(opacity);
 
   useEffect(() => {
     if (selectedObject && selectedObject.material) {
       setObjColor(selectedObject.material.color);
       setObjRefraction(selectedObject.material.refractionRatio);
-      setObjSpecularColor(selectedObject.material.specular);
       setObjReflectivity(selectedObject.material.reflectivity);
       setObjShininess(selectedObject.material.shininess);
+      setObjOpacity(selectedObject.material.opacity);
     }
   }, [selectedObject]);
 
@@ -577,28 +554,22 @@ const ObjectProperties = ({ selectedObject, setSelectedObject }) => {
     setObjColor(color.hex);
   };
 
-  const handleObjectSpecular = (color) => {
-    setObjSpecularColor(color.hex);
-  };
-
   const submitProperties = useCallback(() => {
     const modifySelectedObject = (
       color,
       reflectivity,
-      specular,
       shininess,
-      refractionRatio
+      refractionRatio,
+      opacity
     ) => {
       const ObjColor = new Color(color);
-      const ObjSpecular = new Color(specular);
-      console.log(ObjSpecular);
       if (selectedObject) {
         let temp = selectedObject;
         temp.material.color = ObjColor;
         temp.material.reflectivity = Number(reflectivity);
-        temp.material.specular = ObjSpecular;
         temp.material.shininess = Number(shininess);
         temp.material.refractionRatio = Number(refractionRatio);
+        temp.material.opacity = Number(opacity);
         setSelectedObject(temp);
         console.log(selectedObject);
       }
@@ -606,16 +577,16 @@ const ObjectProperties = ({ selectedObject, setSelectedObject }) => {
     modifySelectedObject(
       ObjColor,
       ObjReflectivity,
-      ObjSpecularColor,
       ObjShininess,
-      ObjRefraction
+      ObjRefraction,
+      ObjOpacity
     );
   }, [
     ObjColor,
     ObjReflectivity,
-    ObjSpecularColor,
     ObjShininess,
     ObjRefraction,
+    ObjOpacity,
     selectedObject,
     setSelectedObject,
   ]);
@@ -669,33 +640,6 @@ const ObjectProperties = ({ selectedObject, setSelectedObject }) => {
               onChangeComplete={handleObjectColor}
             />
           </Popover>
-          <Button
-            style={{ margin: "5px" }}
-            variant="contained"
-            onClick={(event) => setAnchorEl2(event.currentTarget)}
-            size="small"
-            color="secondary"
-          >
-            Select specular color
-          </Button>
-          <Popover
-            open={open2}
-            anchorEl={anchorEl2}
-            onClose={() => setAnchorEl2(null)}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "center",
-            }}
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "center",
-            }}
-          >
-            <SketchPicker
-              color={ObjSpecularColor}
-              onChangeComplete={handleObjectSpecular}
-            />
-          </Popover>
 
           <TextField
             style={{ margin: "5px" }}
@@ -740,6 +684,21 @@ const ObjectProperties = ({ selectedObject, setSelectedObject }) => {
             size="small"
             value={ObjRefraction}
             onChange={(e) => setObjRefraction(e.currentTarget.value)}
+          />
+          <TextField
+            style={{ margin: "5px" }}
+            label="Opacity"
+            type="number"
+            InputProps={{
+              inputProps: {
+                max: 1,
+                min: 0.0,
+                step: 0.01,
+              },
+            }}
+            size="small"
+            value={ObjOpacity}
+            onChange={(e) => setObjOpacity(e.currentTarget.value)}
           />
           <button style={{ margin: "5px" }} type="submit">
             Save
