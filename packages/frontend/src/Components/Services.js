@@ -74,7 +74,7 @@ export default function Services() {
       } = job;
       let renderer = renderers[jobId];
       if (renderer == undefined) {
-        const scene = (await API.scene.get(jobId)).scene;
+        const scene = (await API.scene.get(jobId, true)).scene;
 
         const parsedScene = await SceneLoader.load(scene);
 
