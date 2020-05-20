@@ -310,7 +310,7 @@ export default class RayTracer {
   }
   
   private refractRay(I : Vector3, N: Vector3, eta_t: number): Vector3{
-    let cosi = - Math.max(-1, Math.min(1,I.dot(N)));
+    let cosi = -Math.max(-1, Math.min(1,I.dot(N)));
     let etat = eta_t;
     let etai =  1;
     if (cosi < 0 )
