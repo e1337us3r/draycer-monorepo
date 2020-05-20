@@ -114,41 +114,45 @@ export default class RayTracer {
         .multiplyScalar(normal.dot(v))
         .sub(v);
 
-      const material = ((intersection.object as THREE.Mesh)
-          .material as THREE.MeshPhongMaterial);
-
+      const material = (intersection.object as THREE.Mesh)
+        .material as THREE.MeshPhongMaterial;
 
       const reflectionRay = new THREE.Ray(
-          intersection.point.clone().add(normal.clone().multiplyScalar(0.01)),
-          r
+        intersection.point.clone().add(normal.clone().multiplyScalar(0.01)),
+        r
       );
       const reflected = this.tracedValueForRay(reflectionRay, depth - 1);
 
-      if (material.opacity < 1)
-      {
-        const refractionDirection = this.refractRay(ray.direction.clone(), normal.clone(),material.refractionRatio).normalize();
-        const refractionOrigin = refractionDirection.clone().dot(normal) < 0 ? intersection.point.clone().sub(normal.clone().multiplyScalar(0.001)) :
-            intersection.point.clone().add(normal.clone().multiplyScalar(0.001));
+      if (material.opacity < 1) {
+        const refractionDirection = this.refractRay(
+          ray.direction.clone(),
+          normal.clone(),
+          material.refractionRatio
+        ).normalize();
+        const refractionOrigin =
+          refractionDirection.clone().dot(normal) < 0
+            ? intersection.point
+                .clone()
+                .sub(normal.clone().multiplyScalar(0.001))
+            : intersection.point
+                .clone()
+                .add(normal.clone().multiplyScalar(0.001));
 
-        const refractionRay = new THREE.Ray(refractionOrigin, refractionDirection);
+        const refractionRay = new THREE.Ray(
+          refractionOrigin,
+          refractionDirection
+        );
 
         const refractColor = this.tracedValueForRay(refractionRay, depth - 1);
         color.add(
-            reflected
-                .clone()
-                .multiplyScalar(material.reflectivity).add(refractColor)
+          reflected
+            .clone()
+            .multiplyScalar(material.reflectivity)
+            .add(refractColor)
         );
+      } else {
+        color.add(reflected.clone().multiplyScalar(material.reflectivity));
       }
-
-      else {
-        color.add(
-            reflected
-                .clone()
-                .multiplyScalar(material.reflectivity)
-        );
-      }
-      
-      
     }
 
     return color;
@@ -251,10 +255,17 @@ export default class RayTracer {
       this.threeScene.children
     );
     if (intersections.length > 0) {
-      return (
-        intersections[0].point.distanceTo(point) <
+      if (
+        intersections[0].point.distanceTo(point) >
         light.position.distanceTo(point)
-      );
+      ) {
+        return false;
+      } else {
+        return (
+          ((intersections[0].object as Mesh).material as MeshPhongMaterial)
+            .opacity === 1
+        );
+      }
     } else {
       return false;
     }
@@ -311,23 +322,24 @@ export default class RayTracer {
 
     return imagePlane;
   }
-  
-  private refractRay(I : Vector3, N: Vector3, eta_t: number): Vector3{
-    let cosi = -Math.max(-1, Math.min(1,I.dot(N)));
+
+  private refractRay(I: Vector3, N: Vector3, eta_t: number): Vector3 {
+    const cosi = -Math.max(-1, Math.min(1, I.dot(N)));
     let etat = eta_t;
-    let etai =  1;
-    if (cosi < 0 )
-    {
+    let etai = 1;
+    if (cosi < 0) {
       etat = 1;
       etai = eta_t;
       N.negate();
     }
-    let eta = etai / etat;
+    const eta = etai / etat;
     const k = 1 - eta * eta * (1 - cosi * cosi);
-    return k < 0 ? new Vector3(1,0,0 ) : I.multiplyScalar(eta).add(N.multiplyScalar((eta * cosi - Math.sqrt(k))));
+    return k < 0
+      ? new Vector3(1, 0, 0)
+      : I.multiplyScalar(eta).add(N.multiplyScalar(eta * cosi - Math.sqrt(k)));
   }
   /*
-  private fresnel(I : Vector3, N: Vector3, eta_t: number): number{
+  Private fresnel(I : Vector3, N: Vector3, eta_t: number): number{
     let kr;
     let cosi = Math.max(-1, I.dot(N), 1);
     let etat = eta_t;
