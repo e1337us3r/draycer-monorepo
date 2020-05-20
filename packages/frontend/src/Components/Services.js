@@ -118,6 +118,7 @@ export default function Services() {
         <Table className={classes.table} aria-label="simple table">
           <TableHead>
             <TableRow>
+              <TableCell align="right">Work</TableCell>
               <TableCell align="right">Job Id</TableCell>
               <TableCell align="right">Latest Block Id</TableCell>
               <TableCell align="right">Rendered Block Count</TableCell>
