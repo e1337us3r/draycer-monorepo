@@ -156,7 +156,7 @@ const EditorUI = () => {
 
   const addDirectionalLight = () => {
     const light = new DirectionalLight(new Color(0.5, 0.5, 0.5), 0.8);
-    light.position.set(2, 2, 2);
+    light.position.set(8, 14, 8);
     EDITOR.addLightToScene(light);
   };
 
@@ -530,10 +530,9 @@ const ObjectProperties = ({ selectedObject, setSelectedObject }) => {
     color,
     reflectivity,
     refractionRatio,
-    opacity
+    opacity,
   } = selectedObject;
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [anchorEl2, setAnchorEl2] = React.useState(null);
   const [ObjColor, setObjColor] = useState(color);
   const [ObjRefraction, setObjRefraction] = useState(refractionRatio);
   const [ObjReflectivity, setObjReflectivity] = useState(reflectivity);
@@ -592,7 +591,6 @@ const ObjectProperties = ({ selectedObject, setSelectedObject }) => {
   ]);
 
   const open = Boolean(anchorEl);
-  const open2 = Boolean(anchorEl2);
   return (
     <div
       style={{
@@ -615,7 +613,7 @@ const ObjectProperties = ({ selectedObject, setSelectedObject }) => {
         >
           <Button
             style={{ margin: "5px" }}
-            variant="contained"
+            variant="outlined"
             onClick={(event) => setAnchorEl(event.currentTarget)}
             size="small"
             color="secondary"
@@ -700,9 +698,15 @@ const ObjectProperties = ({ selectedObject, setSelectedObject }) => {
             value={ObjOpacity}
             onChange={(e) => setObjOpacity(e.currentTarget.value)}
           />
-          <button style={{ margin: "5px" }} type="submit">
+          <Button
+            size="small"
+            color="primary"
+            variant="outlined"
+            style={{ margin: "5px" }}
+            type="submit"
+          >
             Save
-          </button>
+          </Button>
         </form>
       </div>
     </div>

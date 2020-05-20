@@ -15,13 +15,21 @@ const Register = () => {
   const [passwordError, setPasswordError] = useState(false);
   const [emailErrorHelper, setEmailErrorHelper] = useState("");
   const [passErrorHelper, setPassErrorHelper] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const history = useHistory();
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     if (email !== "" && password.length >= 6) {
-      await firebase
-        .auth()
-        .createUserWithEmailAndPassword(email, password)
-        .then((u) => console.log(u));
+      setEmailErrorHelper("");
+      setPassErrorHelper("");
+      setEmailError(false);
+      setPasswordError(false);
+      try {
+        await firebase.auth().createUserWithEmailAndPassword(email, password);
+      } catch (error) {
+        setErrorMessage(error.message);
+      }
+
       if (firebase.auth().currentUser) {
         history.push("/console");
       }
@@ -70,9 +78,16 @@ const Register = () => {
               helperText={passErrorHelper}
             />
             <br />
+            {errorMessage ? (
+              <span style={{ fontSize: "0.7rem", color: "red" }}>
+                {errorMessage}
+              </span>
+            ) : (
+              ""
+            )}
           </CardContent>
           <CardActions style={{ display: "flex", justifyContent: "center" }}>
-            <Button variant="contained" color="primary" onClick={handleSubmit}>
+            <Button variant="contained" color="primary" type="submit">
               Register
             </Button>
             <Link to="/login">
