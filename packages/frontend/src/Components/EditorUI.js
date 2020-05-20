@@ -156,7 +156,7 @@ const EditorUI = () => {
 
   const addDirectionalLight = () => {
     const light = new DirectionalLight(new Color(0.5, 0.5, 0.5), 0.8);
-    light.position.set(2, 2, 2);
+    light.position.set(8, 14, 8);
     EDITOR.addLightToScene(light);
   };
 

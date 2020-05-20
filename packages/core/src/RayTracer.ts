@@ -199,7 +199,7 @@ export default class RayTracer {
           .sub(intersection.point)
           .normalize();
       } else if (light instanceof DirectionalLight) {
-        lightSource = light.getWorldDirection(new Vector3());
+        lightSource = light.position.clone().sub(intersection.point).normalize();
       }
 
       const lightInNormalDirection = normal.dot(lightSource);
