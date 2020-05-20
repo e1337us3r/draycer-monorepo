@@ -11,7 +11,6 @@ import TableRow from "@material-ui/core/TableRow";
 import { makeStyles } from "@material-ui/core/styles";
 import API from "../api/client";
 
-
 const useStyles = makeStyles({
   table: {
     minWidth: 650,
@@ -19,24 +18,26 @@ const useStyles = makeStyles({
 });
 
 export default function ViewTask() {
-
   let { id } = useParams();
   const [render, setRender] = useState([]);
-  const [workerRecord, setWorkerRecord] = useState([])
+  const [workerRecord, setWorkerRecord] = useState([]);
   const classes = useStyles();
 
   useEffect(() => {
-    API.scene.get(id).then(data => {
-      setRender(data.render)
+    API.scene.get(id).then((data) => {
+      setRender(data.render);
     });
-    API.scene.getWorkRecords(id).then(data => {
-      setWorkerRecord(data.results)
-    })
+    API.scene.getWorkRecords(id).then((data) => {
+      setWorkerRecord(data.results);
+    });
   }, [id]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'row wrap', padding: '10px' }} elevation={3}>
-      <img style={{ flex: '0 0 50%' }} src={render} alt="" />
+    <div
+      style={{ display: "flex", flexDirection: "row wrap", padding: "10px" }}
+      elevation={3}
+    >
+      <img style={{ flex: "0 0 50%" }} src={render} alt="" />
       <TableContainer component={Paper}>
         <Table className={classes.table} aria-label="simple table">
           <TableHead>
@@ -53,21 +54,25 @@ export default function ViewTask() {
         </Table>
       </TableContainer>
     </div>
-  )
+  );
 }
 
 const RecordList = ({ records }) => {
-  return <TableBody>
-    {records.map((record, ind) =>
-      <TableRow key={record.job_id}>
-        <TableCell component="th" scope="row">#{ind + 1}
-        </TableCell>
-        <TableCell align="right">{record.job_id}
-        </TableCell>
-        <TableCell align="right">{record.user_id}</TableCell>
-        <TableCell align="right">{new Date(record.last_render_at).toLocaleDateString('tr-TR')}</TableCell>
-        <TableCell align="right">{record.rendered_block_count}</TableCell>
-      </TableRow>
-    )}
-  </TableBody>
-}
+  return (
+    <TableBody>
+      {records.map((record, ind) => (
+        <TableRow key={record.job_id}>
+          <TableCell component="th" scope="row">
+            #{ind + 1}
+          </TableCell>
+          <TableCell align="right">{record.job_id}</TableCell>
+          <TableCell align="right">{record.user_id}</TableCell>
+          <TableCell align="right">
+            {new Date(record.last_render_at).toLocaleDateString("tr-TR")}
+          </TableCell>
+          <TableCell align="right">{record.rendered_block_count}</TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
+  );
+};

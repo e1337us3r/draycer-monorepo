@@ -239,6 +239,17 @@ export default class Editor {
     // So it needs to be added manually
     this.camera.userData.matrixWorldInverse = this.camera.matrixWorldInverse;
 
+    // These properties are not saved in toJSON method so they have to be manually saved
+    for (const child of this.scene.children) {
+      // @ts-ignore
+      if (child.material) {
+        // @ts-ignore
+        child.userData.reflectivity = child.material.reflectivity;
+        // @ts-ignore
+        child.userData.refractionRatio = child.material.refractionRatio;
+      }
+    }
+
     return this.scene;
   }
 

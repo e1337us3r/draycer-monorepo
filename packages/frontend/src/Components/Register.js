@@ -16,14 +16,14 @@ const Register = () => {
   const [emailErrorHelper, setEmailErrorHelper] = useState("");
   const [passErrorHelper, setPassErrorHelper] = useState("");
   const history = useHistory();
-  const handleSubmit = async (e) => {
+  const handleSubmit = async () => {
     if (email !== "" && password.length >= 6) {
       await firebase
         .auth()
         .createUserWithEmailAndPassword(email, password)
         .then((u) => console.log(u));
       if (firebase.auth().currentUser) {
-        history.push("/landing");
+        history.push("/console");
       }
     } else {
       if (email === "") {
@@ -71,7 +71,7 @@ const Register = () => {
             />
             <br />
           </CardContent>
-          <CardActions style={{ display: 'flex', justifyContent: 'center' }}>
+          <CardActions style={{ display: "flex", justifyContent: "center" }}>
             <Button variant="contained" color="primary" onClick={handleSubmit}>
               Register
             </Button>

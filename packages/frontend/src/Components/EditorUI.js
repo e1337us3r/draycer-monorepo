@@ -14,7 +14,7 @@ import {
 } from "three";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import Button from "@material-ui/core/Button";
-import { Paper, TextField, Popover } from "@material-ui/core";
+import { Paper, TextField, Popover, Tooltip } from "@material-ui/core";
 import CropDinIcon from "@material-ui/icons/CropDin";
 import Brightness1Icon from "@material-ui/icons/Brightness1";
 import ChangeHistoryIcon from "@material-ui/icons/ChangeHistory";
@@ -129,8 +129,8 @@ const EditorUI = () => {
       opacity: 1,
       shininess: 500,
     });
-    setSelectedObject(material);
     const cube = new Mesh(object, material);
+    setSelectedObject(cube);
     cube.position.set(0, 0, 0);
     EDITOR.addObjectToScene(cube);
   };
@@ -142,8 +142,8 @@ const EditorUI = () => {
       color: 0x00ff00,
       reflectivity: 0.2,
     });
-    setSelectedObject(material);
     const pyramid = new Mesh(object, material);
+    setSelectedObject(pyramid);
     pyramid.position.set(0, 0, 0);
     EDITOR.addObjectToScene(pyramid);
   };
@@ -368,23 +368,35 @@ const EditorUI = () => {
                 aria-label="contained primary button group"
                 style={{ maxHeight: "75px" }}
               >
-                <Button
-                  style={{ marginRight: "10px" }}
-                  hidden={showResult}
-                  onClick={() => renderScene(0)}
+                <Tooltip title="Render the scene from your browser" arrow>
+                  <Button
+                    style={{ marginRight: "10px" }}
+                    hidden={showResult}
+                    onClick={() => renderScene(0)}
+                  >
+                    Client Render
+                  </Button>
+                </Tooltip>
+                <Tooltip
+                  title="Render the scene on the distributed servers of DRaycer"
+                  arrow
                 >
-                  Client Render
-                </Button>
-                <Button
-                  style={{ marginRight: "10px" }}
-                  hidden={showResult}
-                  onClick={() => renderScene(1)}
+                  <Button
+                    style={{ marginRight: "10px" }}
+                    hidden={showResult}
+                    onClick={() => renderScene(1)}
+                  >
+                    Server Render
+                  </Button>
+                </Tooltip>
+                <Tooltip
+                  title="Render using both your browser and the DRaycer servers"
+                  arrow
                 >
-                  Server Render
-                </Button>
-                <Button hidden={showResult} onClick={() => renderScene(2)}>
-                  Client & Server Render
-                </Button>
+                  <Button hidden={showResult} onClick={() => renderScene(2)}>
+                    Client & Server Render
+                  </Button>
+                </Tooltip>
               </ButtonGroup>
             </div>
           </div>
@@ -689,6 +701,13 @@ const ObjectProperties = ({ selectedObject, setSelectedObject }) => {
             style={{ margin: "5px" }}
             size="small"
             label="Reflectivity"
+            InputProps={{
+              inputProps: {
+                max: 1,
+                min: 0.0,
+                step: 0.01,
+              },
+            }}
             type="number"
             value={ObjReflectivity}
             onChange={(e) => setObjReflectivity(e.currentTarget.value)}
@@ -697,6 +716,12 @@ const ObjectProperties = ({ selectedObject, setSelectedObject }) => {
             style={{ margin: "5px" }}
             label="Shininess"
             type="number"
+            InputProps={{
+              inputProps: {
+                max: 1000,
+                min: 0,
+              },
+            }}
             size="small"
             value={ObjShininess}
             onChange={(e) => setObjShininess(e.currentTarget.value)}
@@ -705,6 +730,13 @@ const ObjectProperties = ({ selectedObject, setSelectedObject }) => {
             style={{ margin: "5px" }}
             label="Refraction"
             type="number"
+            InputProps={{
+              inputProps: {
+                max: 1,
+                min: 0.0,
+                step: 0.01,
+              },
+            }}
             size="small"
             value={ObjRefraction}
             onChange={(e) => setObjRefraction(e.currentTarget.value)}

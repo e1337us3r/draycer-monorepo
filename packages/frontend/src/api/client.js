@@ -1,18 +1,15 @@
 import * as axios from "axios";
 import CONFIG from "../config";
-import { auth } from "../Components/auth/firebase";
 
 const getConfig = async () => {
-  let token = "";
-  if (auth().currentUser)
-    token = await auth().currentUser.getIdToken();
   return {
     headers:
-      { authorization: `Bearer ${token}` }
+      { authorization: `Bearer ${API.token}` }
   }
 }
 
 const API = {
+  token: "",
   user: {
     baseUrl: CONFIG.serverUrl + "/user",
     getWorkRecords: async () => {
@@ -21,8 +18,8 @@ const API = {
   },
   scene: {
     baseUrl: CONFIG.serverUrl + "/scene",
-    get: async (id) => {
-      return (await axios.get(API.scene.baseUrl + `/${id}`, await getConfig())).data
+    get: async (id, getRawScene) => {
+      return (await axios.get(API.scene.baseUrl + `/${id}?raw=${getRawScene === true}`, await getConfig())).data
     },
     getAll: async () => {
       return (await axios.get(API.scene.baseUrl, await getConfig())).data

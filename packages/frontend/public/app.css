@@ -1,64 +1,65 @@
 a {
-    text-decoration: none;
+  text-decoration: none;
 }
 
 body {
-    margin: 0 auto;
+  margin: 0 auto;
+  font-family: "Balsamiq Sans", cursive;
 }
 
 .card {
-    width: 350px;
-    margin: 100px auto;
+  width: 350px;
+  margin: 100px auto;
 }
 
 .cardContent {
-    margin: 0 15%;
+  margin: 0 15%;
 }
 .cardContent input {
-    width: 100%;
+  width: 100%;
 }
 
 .buttons {
-    margin: auto 23%;
+  margin: auto 23%;
 }
 
 input {
-    width: 100%;
+  width: 100%;
 }
 
 .landing {
-    width: 60%;
-    margin: 10% 40%;
+  width: 60%;
+  margin: 10% 40%;
 }
 
 .landing button {
-    width: 30%;
-    padding: 20px;
-    margin: 15px;
+  width: 30%;
+  padding: 20px;
+  margin: 15px;
 }
 
 #editor {
-    margin: 10px auto;
+  margin: 10px auto;
 }
 #stage {
-    width: 800px;
-    height: 600px;
-    float: left;
+  width: 800px;
+  height: 600px;
+  float: left;
 }
 
 #stage canvas {
-    position: absolute;
+  position: absolute;
 }
 
 #toolbar {
-    background: rgb(231, 231, 231);
-    float: right;
-    height: 100%;
-    margin: 0 auto;
-    padding: 10px;
+  background: rgb(231, 231, 231);
+  float: right;
+  height: 100%;
+  margin: 0 auto;
+  padding: 10px;
 }
 
 .item:hover {
-    background: gray;
-    cursor: pointer;
+  background: gray;
+  cursor: pointer;
 }

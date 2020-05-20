@@ -158,6 +158,7 @@ export default class RayTracer {
     const color = new Color(0, 0, 0);
     const material = (intersection.object as THREE.Mesh)
       .material as THREE.MeshPhongMaterial;
+    // Console.log(material.shininess);
 
     const v = this.camera.position
       .clone()
@@ -165,6 +166,25 @@ export default class RayTracer {
       .normalize();
 
     const normal = this.getNormalFromIntersection(intersection);
+
+    let diffuse = material.color;
+
+    if (material.map) {
+      const texture = this.textures[intersection.object.uuid];
+
+      const uv = intersection.uv;
+      material.map.transformUv(uv);
+      uv.setX(Math.round(texture.getWidth() * uv.x));
+      uv.setY(Math.round(texture.getHeight() * uv.y));
+
+      const PixelColor = texture.getPixelColor(uv.x, uv.y);
+      const PixelColorText = Jimp.intToRGBA(PixelColor);
+      diffuse = new Color(
+        PixelColorText.r / 255,
+        PixelColorText.g / 255,
+        PixelColorText.b / 255
+      );
+    }
 
     this.lights.forEach(light => {
       let lightSource: Vector3;
@@ -191,25 +211,6 @@ export default class RayTracer {
         return;
       }
 
-      let diffuse = material.color;
-
-      if (material.map) {
-        const texture = this.textures[intersection.object.uuid];
-
-        const uv = intersection.uv;
-        material.map.transformUv(uv);
-        uv.setX(Math.round(texture.getWidth() * uv.x));
-        uv.setY(Math.round(texture.getHeight() * uv.y));
-
-        const PixelColor = texture.getPixelColor(uv.x, uv.y);
-        const PixelColorText = Jimp.intToRGBA(PixelColor);
-        diffuse = new Color(
-          PixelColorText.r / 255,
-          PixelColorText.g / 255,
-          PixelColorText.b / 255
-        );
-      }
-
       diffuse = diffuse
         .clone()
         .multiply(light.color)
@@ -226,7 +227,9 @@ export default class RayTracer {
       const amountReflectedAtViewer = v.dot(r);
       const specular = new Color(1, 1, 1)
         .clone()
-        .multiplyScalar(Math.pow(amountReflectedAtViewer, material.shininess));
+        .multiplyScalar(
+          Math.pow(amountReflectedAtViewer, 1000 - material.shininess)
+        );
       color.add(specular);
     });
 
