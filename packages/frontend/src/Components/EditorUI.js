@@ -732,7 +732,7 @@ const ObjectProperties = ({ selectedObject, setSelectedObject }) => {
             type="number"
             InputProps={{
               inputProps: {
-                max: 1,
+                max: 5,
                 min: 0.0,
                 step: 0.01,
               },
