@@ -15,13 +15,20 @@ const Login = () => {
   const [passwordError, setPasswordError] = useState(false);
   const [emailErrorHelper, setEmailErrorHelper] = useState("");
   const [passErrorHelper, setPassErrorHelper] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const history = useHistory();
   const handleSubmit = async (e) => {
+    e.preventDefault();
     if (email !== "" && password !== "") {
-      await firebase
-        .auth()
-        .signInWithEmailAndPassword(email, password)
-        .then((u) => console.log(u));
+      setEmailErrorHelper("");
+      setPassErrorHelper("");
+      setEmailError(false);
+      setPasswordError(false);
+      try {
+        await firebase.auth().signInWithEmailAndPassword(email, password);
+      } catch (error) {
+        setErrorMessage(error.message);
+      }
 
       if (firebase.auth().currentUser) {
         history.push("/console");
@@ -69,13 +76,32 @@ const Login = () => {
               helperText={passErrorHelper}
             />
             <br />
+            {errorMessage ? (
+              <span style={{ fontSize: "0.7rem", color: "red" }}>
+                {errorMessage}
+              </span>
+            ) : (
+              ""
+            )}
           </CardContent>
-          <CardActions style={{ display: 'flex', justifyContent: 'center' }} className="buttons">
-            <Button style={{ flex: '0 0 50%', alignSelf: 'center' }} variant="contained" color="primary" onClick={handleSubmit}>
+          <CardActions
+            style={{ display: "flex", justifyContent: "center" }}
+            className="buttons"
+          >
+            <Button
+              style={{ flex: "0 0 50%", alignSelf: "center" }}
+              variant="contained"
+              color="primary"
+              type="submit"
+            >
               Login
             </Button>
             <Link to="/register">
-              <Button style={{ flex: '0 0 50%', alignSelf: 'center' }} variant="contained" color="secondary">
+              <Button
+                style={{ flex: "0 0 50%", alignSelf: "center" }}
+                variant="contained"
+                color="secondary"
+              >
                 Register
               </Button>
             </Link>

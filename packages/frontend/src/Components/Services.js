@@ -24,12 +24,15 @@ function TaskList(props) {
   console.log(props.tasks);
   return (
     <TableBody>
-      {tasks.map((item) => {
+      {tasks.map((item, index) => {
         return (
           <TableRow key={item.jobId}>
-            <TableCell align="right" component="th" scope="row">
-              {item.jobId}
-            </TableCell>
+            <TableCell
+              align="right"
+              component="th"
+              scope="row"
+            >{`Work #${index + 1}`}</TableCell>
+            <TableCell align="right">{item.jobId}</TableCell>
             <TableCell align="right">{item.latestBlockId}</TableCell>
             <TableCell align="right">{item.renderedBlockCount}</TableCell>
             <TableCell align="right">{item.status}</TableCell>
