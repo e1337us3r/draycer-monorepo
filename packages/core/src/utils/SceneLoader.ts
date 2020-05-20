@@ -11,6 +11,14 @@ export default class SceneLoader {
 
         for (const obj of scene.children) {
           obj.matrixWorld = obj.matrix;
+
+          // @ts-ignore
+          if (obj.material) {
+            // @ts-ignore
+            obj.material.reflectivity = obj.userData.reflectivity;
+            // @ts-ignore
+            obj.material.refractionRatio = obj.userData.refractionRatio;
+          }
         }
 
         const camera = scene.getObjectByName(Editor.NAME_CAMERA);
