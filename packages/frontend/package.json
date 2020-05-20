@@ -1,43 +1,48 @@
 {
-    "name": "draycer-frontend",
-    "version": "0.1.0",
-    "private": true,
-    "dependencies": {
-        "@material-ui/core": "4.8.0",
-        "@material-ui/icons": "^4.9.1",
-        "axios": "0.19.2",
-        "draycer": "0.0.1",
-        "firebase": "6.3.1",
-        "greenlet": "1.1.0",
-        "react": "16.8.6",
-        "react-app-rewired": "2.1.5",
-        "react-color": "^2.18.0",
-        "react-dom": "16.8.6",
-        "react-router-dom": "5.1.2",
-        "react-scripts": "3.0.1",
-        "socket.io-client": "^2.3.0",
-        "styled-components": "^5.1.0",
-        "worker-loader": "^2.0.0"
-    },
-    "scripts": {
-        "start": "react-app-rewired start",
-        "build": "react-app-rewired build",
-        "test": "react-app-rewired test",
-        "eject": "react-scripts eject"
-    },
-    "eslintConfig": {
-        "extends": "react-app"
-    },
-    "browserslist": {
-        "production": [
-            ">0.2%",
-            "not dead",
-            "not op_mini all"
-        ],
-        "development": [
-            "last 1 chrome version",
-            "last 1 firefox version",
-            "last 1 safari version"
-        ]
-    }
+  "name": "draycer-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@material-ui/core": "4.8.0",
+    "@material-ui/icons": "^4.9.1",
+    "axios": "0.19.2",
+    "draycer": "0.0.1",
+    "firebase": "6.3.1",
+    "greenlet": "1.1.0",
+    "react": "16.8.6",
+    "react-app-rewired": "2.1.5",
+    "react-color": "^2.18.0",
+    "react-dom": "16.8.6",
+    "react-router-dom": "5.1.2",
+    "react-scripts": "3.0.1",
+    "socket.io-client": "^2.3.0",
+    "styled-components": "^5.1.0",
+    "worker-loader": "^2.0.0"
+  },
+  "scripts": {
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "eslint": "^7.0.0",
+    "eslint-plugin-react": "^7.20.0",
+    "eslint-plugin-react-hooks": "^4.0.2"
+  }
 }
