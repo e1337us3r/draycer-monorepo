@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Paper from "@material-ui/core/Paper";
-import { getSceneWorkRecord, getScene } from "../api/client";
 import TableBody from "@material-ui/core/TableBody";
 import Table from "@material-ui/core/Table";
 import TableCell from "@material-ui/core/TableCell";
@@ -24,12 +23,16 @@ export default function ViewTask() {
   const classes = useStyles();
 
   useEffect(() => {
-    API.scene.get(id).then((data) => {
-      setRender(data.render);
-    });
-    API.scene.getWorkRecords(id).then((data) => {
-      setWorkerRecord(data.results);
-    });
+    const fetchSceneAndWorkers = setInterval(() => {
+      API.scene.get(id).then((data) => {
+        setRender(data.render);
+      });
+      API.scene.getWorkRecords(id).then((data) => {
+        setWorkerRecord(data.results);
+      });
+    }, 3000);
+
+    return () => clearInterval(fetchSceneAndWorkers);
   }, [id]);
 
   return (

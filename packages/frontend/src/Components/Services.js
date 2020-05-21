@@ -35,7 +35,7 @@ function TaskList(props) {
             <TableCell align="right">{item.jobId}</TableCell>
             <TableCell align="right">{item.latestBlockId}</TableCell>
             <TableCell align="right">{item.renderedBlockCount}</TableCell>
-            <TableCell align="right">{item.status}</TableCell>
+            <TableCell align="right">{props.complete}</TableCell>
           </TableRow>
         );
       })}
@@ -47,12 +47,14 @@ export default function Services() {
   const classes = useStyles();
   const [tasks, setTasks] = useState({});
   const [lastJob, setLastJob] = useState({});
+  const [complete, setComplete] = useState();
   useEffect(() => {
     const socket = socketIOClient(CONFIG.serverSocketUrl);
     const renderers = {};
     console.log("SOCKET CONNECTED");
     socket.on("RENDER_BLOCK", async (job) => {
       setLastJob(job);
+      setComplete("rendering");
       const { block, jobId, blockId, width, height } = job;
       let renderer = renderers[jobId];
       if (renderer == undefined) {
@@ -82,6 +84,7 @@ export default function Services() {
       console.log(
         `EVENT: BLOCK_RENDERED | id= ${job.jobId}| blockId=${blockId}`
       );
+      setComplete("completed");
     });
     return () => {
       socket.disconnect();
@@ -107,7 +110,7 @@ export default function Services() {
         };
       }
       if (tasks[job.jobId] !== temp) {
-        setTasks({ [job.jobId]: temp });
+        setTasks({ ...tasks, [job.jobId]: temp });
       }
     }
   }, [lastJob, tasks]);
@@ -125,7 +128,7 @@ export default function Services() {
               <TableCell align="right">Status</TableCell>
             </TableRow>
           </TableHead>
-          <TaskList tasks={tasks} />
+          <TaskList tasks={tasks} complete={complete} />
         </Table>
       </TableContainer>
       <Button
