@@ -77,9 +77,7 @@ export default class Editor {
     // Camera controls does not work without this line
     this.camera.position.set(-5, 5, 5);
     this.setUpRenderer();
-    this.addSkybox(
-      "https://cors-anywhere.herokuapp.com/https://wallpaperaccess.com/full/945996.jpg"
-    );
+    this.addSkybox("https://i.ibb.co/VLp4kwZ/skybox.jpg");
     this.setUpGridHelper();
     this.setUpControls();
   }
@@ -141,7 +139,7 @@ export default class Editor {
       side: BackSide
     });
     material.uniforms.tEquirect.value = texture;
-    const plane = new BoxBufferGeometry(20, 20, 20);
+    const plane = new BoxBufferGeometry(100, 100, 100);
     this.skybox = new Mesh(plane, material);
     this.helpers.push(this.skybox);
     this.scene.add(this.skybox);

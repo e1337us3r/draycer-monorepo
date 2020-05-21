@@ -89,7 +89,11 @@ export default class RayTracer {
     return Utils.imageColorFromColor(color);
   }
 
-  private tracedValueForRay(ray: THREE.Ray, depth: number): Color {
+  private tracedValueForRay(
+    ray: THREE.Ray,
+    depth: number,
+    isFirstRay = true
+  ): Color {
     this.raycaster.set(ray.origin, ray.direction);
     const intersection = this.raycaster.intersectObjects(
       this.threeScene.children
@@ -101,7 +105,7 @@ export default class RayTracer {
 
     const normal = this.getNormalFromIntersection(intersection);
 
-    const color = this.colorAtIntersection(intersection);
+    const color = this.colorAtIntersection(intersection, isFirstRay);
 
     if (depth > 0) {
       const v = ray.direction
@@ -121,7 +125,7 @@ export default class RayTracer {
         intersection.point.clone().add(normal.clone().multiplyScalar(0.01)),
         r
       );
-      const reflected = this.tracedValueForRay(reflectionRay, depth - 1);
+      const reflected = this.tracedValueForRay(reflectionRay, depth - 1, false);
 
       if (material.opacity < 1) {
         const refractionDirection = this.refractRay(
@@ -143,7 +147,11 @@ export default class RayTracer {
           refractionDirection
         );
 
-        const refractColor = this.tracedValueForRay(refractionRay, depth - 1);
+        const refractColor = this.tracedValueForRay(
+          refractionRay,
+          depth - 1,
+          false
+        );
         color.add(
           reflected
             .clone()
@@ -158,11 +166,13 @@ export default class RayTracer {
     return color;
   }
 
-  private colorAtIntersection(intersection: THREE.Intersection): Color {
+  private colorAtIntersection(
+    intersection: THREE.Intersection,
+    isFirstRay: boolean
+  ): Color {
     const color = new Color(0, 0, 0);
     const material = (intersection.object as THREE.Mesh)
       .material as THREE.MeshPhongMaterial;
-    // Console.log(material.shininess);
 
     const v = this.camera.position
       .clone()
@@ -199,7 +209,10 @@ export default class RayTracer {
           .sub(intersection.point)
           .normalize();
       } else if (light instanceof DirectionalLight) {
-        lightSource = light.position.clone().sub(intersection.point).normalize();
+        lightSource = light.position
+          .clone()
+          .sub(new Vector3(0, 0, 0))
+          .normalize();
       }
 
       const lightInNormalDirection = normal.dot(lightSource);
@@ -222,19 +235,21 @@ export default class RayTracer {
         .multiplyScalar(material.opacity);
       color.add(diffuse);
 
-      const r = normal
-        .clone()
-        .multiplyScalar(2)
-        .multiplyScalar(lightInNormalDirection)
-        .sub(lightSource);
+      if (isFirstRay) {
+        const r = normal
+          .clone()
+          .multiplyScalar(2)
+          .multiplyScalar(lightInNormalDirection)
+          .sub(lightSource);
 
-      const amountReflectedAtViewer = v.dot(r);
-      const specular = new Color(1, 1, 1)
-        .clone()
-        .multiplyScalar(
-          Math.pow(amountReflectedAtViewer, 1000 - material.shininess)
-        );
-      color.add(specular);
+        const amountReflectedAtViewer = v.dot(r);
+        const specular = new Color(1, 1, 1)
+          .clone()
+          .multiplyScalar(
+            Math.pow(amountReflectedAtViewer, 1000 - material.shininess)
+          );
+        color.add(specular);
+      }
     });
 
     color.r = color.r < 0 ? 0 : color.r > 1 ? 1 : color.r;
@@ -338,36 +353,6 @@ export default class RayTracer {
       ? new Vector3(1, 0, 0)
       : I.multiplyScalar(eta).add(N.multiplyScalar(eta * cosi - Math.sqrt(k)));
   }
-  /*
-  Private fresnel(I : Vector3, N: Vector3, eta_t: number): number{
-    let kr;
-    let cosi = Math.max(-1, I.dot(N), 1);
-    let etat = eta_t;
-    let etai =  1;
-    if (cosi < 0 )
-    {
-      etat = 1;
-      etai = eta_t;
-      N.negate();
-    }
-    let eta = etai / etat;
-    let k = 1 - eta * eta * (1 - cosi * cosi);
-    if (k >= 1)
-    {
-      kr = 1;
-    }
-    else
-    {
-      let cost = Math.sqrt(Math.max(0,1 - k * k));
-      cost = Math.abs(cost);
-      const Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
-      const Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
-      kr = (Rs * Rs + Rp * Rp) / 2;
-
-    }
-    
-    return kr;
-  }*/
 
   private getNormalFromIntersection(intersection: Intersection): Vector3 {
     const mesh = intersection.object as Mesh;

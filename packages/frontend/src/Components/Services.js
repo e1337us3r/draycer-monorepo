@@ -12,6 +12,7 @@ import socketIOClient from "socket.io-client";
 import CONFIG from "../config";
 import { RayTracer, SceneLoader } from "draycer";
 import API from "../api/client";
+import firebase from "../Components/auth/firebase";
 
 const useStyles = makeStyles({
   table: {
@@ -52,6 +53,10 @@ export default function Services() {
     const socket = socketIOClient(CONFIG.serverSocketUrl);
     const renderers = {};
     console.log("SOCKET CONNECTED");
+
+    socket.emit("join", {
+      userId: firebase.auth().currentUser.uid
+    });
     socket.on("RENDER_BLOCK", async (job) => {
       setLastJob(job);
       setComplete("rendering");
