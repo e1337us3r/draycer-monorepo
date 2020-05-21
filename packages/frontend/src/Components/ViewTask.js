@@ -23,6 +23,12 @@ export default function ViewTask() {
   const classes = useStyles();
 
   useEffect(() => {
+    API.scene.get(id).then((data) => {
+      setRender(data.render);
+    });
+    API.scene.getWorkRecords(id).then((data) => {
+      setWorkerRecord(data.results);
+    });
     const fetchSceneAndWorkers = setInterval(() => {
       API.scene.get(id).then((data) => {
         setRender(data.render);

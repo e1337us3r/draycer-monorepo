@@ -20,6 +20,9 @@ export default function UserWorkRecord() {
   const classes = useStyles();
 
   useEffect(() => {
+    API.user.getWorkRecords().then((data) => {
+      setWorkerRecord(data.results);
+    });
     const fetchWorkHistory = setInterval(() => {
       API.user.getWorkRecords().then((data) => {
         setWorkerRecord(data.results);
