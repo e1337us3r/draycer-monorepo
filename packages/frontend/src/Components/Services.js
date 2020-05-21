@@ -55,7 +55,7 @@ export default function Services() {
     console.log("SOCKET CONNECTED");
 
     socket.emit("join", {
-      userId: firebase.auth().currentUser.uid
+      userId: localStorage.getItem("userId")
     });
     socket.on("RENDER_BLOCK", async (job) => {
       setLastJob(job);

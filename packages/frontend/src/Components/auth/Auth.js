@@ -9,10 +9,14 @@ const AuthProvider = ({ children }) => {
   useEffect(() => {
     app.auth().onAuthStateChanged((user) => {
       setCurrentUser(user);
-      user.getIdToken().then(token => API.token = token)
+      user.getIdToken().then(token => {
+        localStorage.setItem("token", token);
+      })
+      localStorage.setItem("userId", user.uid);
       // Refresh auth token evey 10 mins
       const refreshHandler = async () => {
-        API.token = await app.auth().currentUser.getIdToken(true);
+        const token = await app.auth().currentUser.getIdToken(true);
+        localStorage.setItem("token", token);
         setTimeout(refreshHandler, 10*60*1000)
       }
       refreshHandler();

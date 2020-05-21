@@ -4,11 +4,12 @@ import CONFIG from "../config";
 const getConfig = async () => {
   return {
     headers:
-      { authorization: `Bearer ${API.token}` }
+      { authorization: `Bearer ${localStorage.getItem("token")}` }
   }
 }
 
 const API = {
+  userId: "",
   token: "",
   user: {
     baseUrl: CONFIG.serverUrl + "/user",
