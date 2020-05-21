@@ -28,7 +28,7 @@ export default function ViewTasks() {
     API.scene
       .getAll()
       .then((data) => setTasks(data.results))
-      .catch((error) => {});
+      .catch(() => {});
     // request every 3 seconds after component is mounted
     const fetchTasksInterval = setInterval(() => {
       API.scene
