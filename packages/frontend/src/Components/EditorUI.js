@@ -531,7 +531,7 @@ const ObjectProperties = ({ selectedObject, setSelectedObject }) => {
     reflectivity,
     refractionRatio,
     opacity,
-  } = selectedObject;
+  } = selectedObject.material;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [ObjColor, setObjColor] = useState(color);
   const [ObjRefraction, setObjRefraction] = useState(refractionRatio);
