@@ -1,4 +1,9 @@
-# Parfüm | DRaycer Front-end App
+# DRaycer
+![Team4](https://github.com/e1337us3r/draycer-monorepo/assets/29656513/19f7af81-855f-4f9c-b44e-a106ab51e405)
+
+
+## What is DRaycer?
+DRaycer is a web-based distributed Ray Tracing rendering system that is a faster and cheaper alternative to traditional rendering farms used by film and media industry. Users can create the scene that they want to render on our feature-rich scene editor. Add lights, set up the camera, place premade 3D objects or even upload your models, with a click of a button your scene will be rendered and delivered to you in a moment. The distributed nature of the system allows it to outsource each chunk of the rendering process to a worker that is connected to our system. Any device that can open an Internet browser can become a worker; smartphones, and IoT devices, which total up to billions of devices. Using these devices DRaycer can render complex 3D scenes with ray tracing in just a few seconds at the fraction of the cost. 
 
 ## Getting started
 
@@ -34,7 +39,11 @@ yarn run build
 
 to create a production grade build of the core DRaycer Ray Tracing algorithm.
 
-## 4) Run the application
+## 4) Start the backend
+
+Follow the instructions in the backend repository [https://github.com/e1337us3r/draycer-backend](https://github.com/e1337us3r/draycer-backend)
+
+## 5) Run the application
 
 ```
 yarn start
